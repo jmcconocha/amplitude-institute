@@ -149,6 +149,16 @@ git push -u origin main
 - ✅ **Zero configuration** - works with render.yaml
 - ✅ **Integrated with GitHub**
 
+#### Managing Your Deployment
+- **Render Dashboard**: [https://dashboard.render.com](https://dashboard.render.com)
+- Monitor deployments, view logs, and manage settings
+- Configure custom domains, environment variables, and scaling
+
+#### Troubleshooting
+If you get "disks are not supported for free tier services" error:
+- This has been fixed in the render.yaml file
+- Try deploying again, or use "Web Service" instead of "Blueprint"
+
 ### Alternative: Static Site Deployment
 If Docker doesn't work on free tier, you can deploy as static files:
 

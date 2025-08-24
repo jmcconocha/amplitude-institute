@@ -218,7 +218,7 @@ The Amplitude Institute is a collaborative R&D organization designed to bridge t
 
 ## 📞 Contact
 
-For more information about The Amplitude Institute or this website, please contact us at info@amplitudeinstitute.org.
+For more information about The Amplitude Institute or this website, please contact us at jmcconocga@abydosone.ltd.
 
 ---
 

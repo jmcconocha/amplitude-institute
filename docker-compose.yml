@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  amplitude-institute-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: amplitude-institute-web
+    ports:
+      - "80:80"
+      - "443:443"  # For future HTTPS setup
+    restart: unless-stopped
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    volumes:
+      # Mount logs for debugging (optional)
+      - ./logs:/var/log/nginx
+      # Mount custom nginx config if needed
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - amplitude-network
+    labels:
+      - "traefik.enable=true"  # For future reverse proxy setup
+      - "traefik.http.routers.amplitude.rule=Host(`amplitudeinstitute.local`)"
+      - "traefik.http.services.amplitude.loadbalancer.server.port=80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a development server with live reload
+  amplitude-institute-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: amplitude-institute-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    profiles:
+      - dev
+    networks:
+      - amplitude-network
+
+networks:
+  amplitude-network:
+    driver: bridge
+    name: amplitude-network
+
+volumes:
+  nginx-logs:
+    name: amplitude-nginx-logs

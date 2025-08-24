@@ -1,0 +1,83 @@
+# Render Blueprint Configuration
+# This file defines how to deploy The Amplitude Institute website on Render
+
+services:
+  - type: web
+    name: amplitude-institute
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    
+    # Docker configuration
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    
+    # Environment configuration
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 80
+    
+    # Health check
+    healthCheckPath: /health
+    
+    # Scaling (free tier limitations)
+    numInstances: 1
+    
+    # Auto-deploy settings
+    autoDeploy: true
+    
+    # Build settings
+    buildFilter:
+      paths:
+        - index.html
+        - styles.css
+        - script.js
+        - Dockerfile
+        - nginx.conf
+    
+    # Domain settings (will be auto-generated)
+    # Custom domain can be added later
+    
+    # Resource limits for free tier
+    disk:
+      name: amplitude-institute-disk
+      mountPath: /var/log
+      sizeGB: 1
+
+# Static site alternative (if Docker doesn't work on free tier)
+# Uncomment and modify if needed:
+#
+# - type: static_site
+#   name: amplitude-institute-static
+#   buildCommand: echo "No build needed"
+#   publishPath: .
+#   pullRequestPreviewsEnabled: true
+#   
+#   # Static file routing
+#   routes:
+#     - type: rewrite
+#       source: /*
+#       destination: /index.html
+#   
+#   # Environment variables for static site
+#   envVars:
+#     - key: NODE_ENV
+#       value: production
+#   
+#   # Headers for static assets
+#   headers:
+#     - path: /*
+#       name: X-Frame-Options
+#       value: DENY
+#     - path: /*
+#       name: X-Content-Type-Options
+#       value: nosniff
+#     - path: /
+#       name: Cache-Control
+#       value: no-cache
+#     - path: /static/*
+#       name: Cache-Control
+#       value: public, max-age=31536000, immutable

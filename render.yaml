@@ -42,10 +42,7 @@ services:
     # Custom domain can be added later
     
     # Resource limits for free tier
-    disk:
-      name: amplitude-institute-disk
-      mountPath: /var/log
-      sizeGB: 1
+    # Note: Disks not supported on free tier
 
 # Static site alternative (if Docker doesn't work on free tier)
 # Uncomment and modify if needed:

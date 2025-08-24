@@ -15,11 +15,7 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy website files to nginx html directory
-COPY index.html /usr/share/nginx/html/
-COPY research-community.html /usr/share/nginx/html/
-COPY partnerships.html /usr/share/nginx/html/
-COPY styles.css /usr/share/nginx/html/
-COPY script.js /usr/share/nginx/html/
+COPY index.html research-community.html partnerships.html styles.css script.js /usr/share/nginx/html/
 
 # Create directory for logs
 RUN mkdir -p /var/log/nginx

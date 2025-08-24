@@ -63,9 +63,8 @@ dist/
 build/
 
 # Docker files (don't copy into container)
-Dockerfile*
 docker-compose*.yml
-.dockerignore
+deploy.sh
 
 # Source documents (we only need the final website files)
 "Private & Shared/"

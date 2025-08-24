@@ -15,7 +15,9 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy website files to nginx html directory
-COPY *.html /usr/share/nginx/html/
+COPY index.html /usr/share/nginx/html/
+COPY research-community.html /usr/share/nginx/html/
+COPY partnerships.html /usr/share/nginx/html/
 COPY styles.css /usr/share/nginx/html/
 COPY script.js /usr/share/nginx/html/
 

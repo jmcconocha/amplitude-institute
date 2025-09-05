@@ -4,45 +4,39 @@
 services:
   - type: web
     name: amplitude-institute
-    runtime: docker
+    env: node
     plan: free
     region: oregon
     branch: main
-    
-    # Docker configuration
-    dockerfilePath: ./Dockerfile
-    dockerContext: ./
+    buildCommand: npm install
+    startCommand: npm start
     
     # Environment configuration
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 80
-    
-    # Health check
-    healthCheckPath: /health
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: jmcconocha@abydosone.ltd
+      - key: ADMIN_PASSWORD
+        value: TempAdmin123!
+      - key: SITE_URL
+        value: https://amplitude-institute.onrender.com
+      - key: USE_POSTGRESQL
+        value: true
     
     # Scaling (free tier limitations)
     numInstances: 1
     
     # Auto-deploy settings
     autoDeploy: true
-    
-    # Build settings
-    buildFilter:
-      paths:
-        - index.html
-        - styles.css
-        - script.js
-        - Dockerfile
-        - nginx.conf
-    
-    # Domain settings (will be auto-generated)
-    # Custom domain can be added later
-    
-    # Resource limits for free tier
-    # Note: Disks not supported on free tier
+
+databases:
+  - name: amplitude-db
+    plan: free
+    databaseName: amplitude_institute
+    user: amplitude_user
 
 # Static site alternative (if Docker doesn't work on free tier)
 # Uncomment and modify if needed:

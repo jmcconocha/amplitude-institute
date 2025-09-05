@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - The Amplitude Institute</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .admin-header h1 {
+            margin: 0 0 10px;
+            font-size: 28px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .admin-header .welcome-text {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        .admin-panel {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        @media (min-width: 768px) {
+            .admin-panel {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .panel-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        .panel-card h2 {
+            margin: 0 0 20px;
+            font-size: 22px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .user-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .user-table td {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-blocked {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-approve {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .btn-approve:hover {
+            background: #059669;
+        }
+        
+        .btn-deny {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .btn-deny:hover {
+            background: #dc2626;
+        }
+        
+        .btn-remove {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .btn-remove:hover {
+            background: #4b5563;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            color: white;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: #10b981;
+        }
+        
+        .notification.error {
+            background: #ef4444;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .back-to-site {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+        
+        .back-to-site:hover {
+            background: #5a67d8;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1><i class="fas fa-shield-alt"></i> Admin Panel</h1>
+            <p class="welcome-text">Welcome, <span id="adminEmail"></span></p>
+            <div>
+                <a href="/" class="back-to-site">Back to Site</a>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <div class="admin-panel">
+            <!-- Statistics Card -->
+            <div class="panel-card">
+                <h2><i class="fas fa-chart-bar"></i> User Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalUsers">0</span>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="pendingUsers">0</span>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="approvedUsers">0</span>
+                        <div class="stat-label">Approved</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="deniedUsers">0</span>
+                        <div class="stat-label">Blocked</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Registrations -->
+            <div class="panel-card">
+                <h2><i class="fas fa-clock"></i> Pending Registrations</h2>
+                <div id="pendingList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- All Users Management -->
+            <div class="panel-card" style="grid-column: 1 / -1;">
+                <h2><i class="fas fa-users"></i> All Users</h2>
+                <div id="usersList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading users...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let users = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminAuth();
+            loadUsers();
+        });
+        
+        async function checkAdminAuth() {
+            try {
+                const response = await fetch('/api/auth/me', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (!data.success || !data.user || !data.user.is_admin) {
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                document.getElementById('adminEmail').textContent = data.user.email;
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '/login';
+            }
+        }
+        
+        async function loadUsers() {
+            try {
+                // Load users and stats in parallel
+                const [usersResponse, statsResponse] = await Promise.all([
+                    fetch('/api/admin/users', { credentials: 'include' }),
+                    fetch('/api/admin/stats', { credentials: 'include' })
+                ]);
+                
+                const usersData = await usersResponse.json();
+                const statsData = await statsResponse.json();
+                
+                if (usersData.success) {
+                    users = usersData.data.users;
+                    renderPendingUsers();
+                    renderAllUsers();
+                } else {
+                    showNotification('Failed to load users', 'error');
+                }
+                
+                if (statsData.success) {
+                    updateStatistics(statsData.data);
+                } else {
+                    console.error('Failed to load statistics');
+                }
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                showNotification('Network error loading data', 'error');
+            }
+        }
+        
+        function updateStatistics(statsData) {
+            if (statsData) {
+                document.getElementById('totalUsers').textContent = statsData.totalUsers;
+                document.getElementById('pendingUsers').textContent = statsData.pendingUsers;
+                document.getElementById('approvedUsers').textContent = statsData.approvedUsers;
+                document.getElementById('deniedUsers').textContent = statsData.blockedUsers;
+            } else {
+                // Fallback to calculating from users array
+                const total = users.length;
+                const pending = users.filter(u => u.status === 'pending').length;
+                const approved = users.filter(u => u.status === 'approved').length;
+                const blocked = users.filter(u => u.status === 'blocked').length;
+                
+                document.getElementById('totalUsers').textContent = total;
+                document.getElementById('pendingUsers').textContent = pending;
+                document.getElementById('approvedUsers').textContent = approved;
+                document.getElementById('deniedUsers').textContent = blocked;
+            }
+        }
+        
+        function renderPendingUsers() {
+            const pendingUsers = users.filter(u => u.status === 'pending');
+            const container = document.getElementById('pendingList');
+            
+            if (pendingUsers.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>No pending registrations</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const tableHTML = `
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Organization</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${pendingUsers.map(user => `
+                            <tr>
+                                <td>${user.first_name} ${user.last_name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.organization || 'N/A'}</td>
+                                <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-approve" onclick="approveUser(${user.id})">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                        <button class="btn-deny" onclick="denyUser(${user.id})">
+                                            <i class="fas fa-times"></i> Deny
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+        
+        function renderAllUsers() {
+            const container = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No users found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const tableHTML = `
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Organization</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(user => `
+                            <tr>
+                                <td>${user.first_name} ${user.last_name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.organization || 'N/A'}</td>
+                                <td>
+                                    <span class="status-badge status-${user.status}">
+                                        ${user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                                    </span>
+                                </td>
+                                <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        ${user.status === 'pending' ? `
+                                            <button class="btn-approve" onclick="approveUser(${user.id})">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn-deny" onclick="denyUser(${user.id})">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        ` : user.status === 'approved' ? `
+                                            <button class="btn-deny" onclick="blockUser(${user.id})">
+                                                <i class="fas fa-ban"></i> Block
+                                            </button>
+                                        ` : user.status === 'blocked' ? `
+                                            <button class="btn-approve" onclick="unblockUser(${user.id})">
+                                                <i class="fas fa-undo"></i> Unblock
+                                            </button>
+                                        ` : ''}
+                                        ${user.role !== 'admin' ? `
+                                            <button class="btn-remove" onclick="removeUser(${user.id})" title="Delete user permanently">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+        
+        async function approveUser(userId) {
+            if (!confirm('Approve this user registration?')) return;
+            
+            const notes = prompt('Add any approval notes (optional):');
+            if (notes === null && !confirm('Continue approval without notes?')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ notes: notes || '' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('User approved successfully', 'success');
+                    loadUsers();
+                } else {
+                    showNotification(data.message || 'Failed to approve user', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to approve user:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        async function denyUser(userId) {
+            const reason = prompt('Please provide a reason for denial (optional):');
+            if (reason === null) return; // User cancelled
+            
+            if (!confirm('Deny this user registration?')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/deny`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ 
+                        reason: reason || 'Registration denied by administrator',
+                        notes: reason
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('User registration denied', 'success');
+                    loadUsers();
+                } else {
+                    showNotification(data.message || 'Failed to deny user', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to deny user:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        async function blockUser(userId) {
+            if (!confirm('Block this user? They will no longer be able to access the site.')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/block`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ block: true })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('User blocked successfully', 'success');
+                    loadUsers();
+                } else {
+                    showNotification(data.message || 'Failed to block user', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to block user:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        async function unblockUser(userId) {
+            if (!confirm('Unblock this user? They will regain access to the site.')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/block`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ block: false })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('User unblocked successfully', 'success');
+                    loadUsers();
+                } else {
+                    showNotification(data.message || 'Failed to unblock user', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to unblock user:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        async function removeUser(userId) {
+            if (!confirm('Permanently delete this user? This action cannot be undone.')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('User removed successfully', 'success');
+                    loadUsers();
+                } else {
+                    showNotification(data.message || 'Failed to remove user', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to remove user:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        async function logout() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    showNotification('Logout failed', 'error');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const existing = document.querySelector('.notification');
+            if (existing) {
+                existing.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -2,6 +2,29 @@
 
 A professional website for The Amplitude Institute, a tech innovation think tank focused on advancing software-hardware innovation through collaborative R&D and strategic IP development.
 
+## 🔐 Authentication System
+
+The website now includes a complete authentication system that restricts access to authenticated users only:
+
+### Features
+- **Protected Access**: All main site content requires authentication
+- **Registration System**: Users can register and wait for admin approval
+- **Admin Approval Workflow**: All registrations are reviewed by administrators
+- **Email Notifications**: Automatic emails for registration, approval, and denial
+- **Admin Panel**: Complete user management interface
+- **JWT Authentication**: Secure token-based authentication with HTTP-only cookies
+
+### User Roles
+- **Admin**: Can approve/deny registrations, manage all users, access admin panel
+- **Approved User**: Can access the full website content
+- **Pending User**: Registered but waiting for approval (no site access)
+- **Blocked User**: Access denied by administrator
+
+### Admin Access
+- **Default Admin**: `jmcconocha@abydosone.ltd`
+- **Default Password**: `TempAdmin123!` (change immediately after first login)
+- **Admin Panel**: Available at `/admin` after login
+
 ## 🚀 Quick Start with Docker
 
 ### Prerequisites
@@ -56,18 +79,38 @@ A professional website for The Amplitude Institute, a tech innovation think tank
 
 ```
 TheAmplitudeInstitute/
-├── index.html          # Main HTML structure
-├── styles.css          # CSS with blue gradients and responsive design
-├── script.js           # JavaScript for smooth scrolling and interactions
-├── Dockerfile          # Docker container configuration
-├── docker-compose.yml  # Docker Compose for easy deployment
-├── nginx.conf          # Nginx configuration for optimal performance
-├── .dockerignore       # Docker build optimization
-└── README.md           # This file
+├── server.js                    # Express.js server with authentication
+├── package.json                 # Node.js dependencies and scripts
+├── .env.example                 # Environment variables template
+├── public/                      # Static web files
+│   ├── index.html              # Main website
+│   ├── login.html              # Login page
+│   ├── register.html           # Registration page
+│   ├── admin.html              # Admin panel
+│   ├── partnerships.html       # Partnerships page
+│   ├── research-community.html # Research community page
+│   ├── styles.css              # CSS with blue gradients and responsive design
+│   └── script.js               # JavaScript for smooth scrolling and interactions
+├── routes/                      # API route handlers
+│   ├── auth.js                 # Authentication routes (login, register, logout)
+│   └── admin.js                # Admin routes (user management)
+├── middleware/                  # Express middleware
+│   └── auth.js                 # Authentication middleware
+├── services/                    # Business logic services
+│   └── email.js                # Email notification service
+├── database/                    # Database setup and management
+│   ├── init.js                 # Database initialization
+│   └── users.db                # SQLite database (created automatically)
+├── Dockerfile                   # Docker container configuration
+├── docker-compose.yml          # Docker Compose for easy deployment
+├── nginx.conf                  # Nginx configuration for optimal performance
+├── .dockerignore               # Docker build optimization
+└── README.md                   # This file
 ```
 
 ## 🎨 Features
 
+### Website Features
 - **Responsive Design**: Mobile-first approach with breakpoints for all devices
 - **Modern UI**: Blue gradient themes with smooth animations
 - **Performance Optimized**: Nginx with gzip compression and caching
@@ -75,18 +118,59 @@ TheAmplitudeInstitute/
 - **Interactive Elements**: Hover effects, mobile navigation, and notification system
 - **SEO Friendly**: Proper meta tags and semantic HTML structure
 
+### Authentication Features
+- **Secure Authentication**: JWT tokens with HTTP-only cookies
+- **User Registration**: Self-service registration with admin approval
+- **Admin Panel**: Complete user management dashboard
+- **Email Notifications**: SMTP integration for registration and approval workflows
+- **Role-based Access**: Admin and user roles with different permissions
+- **Session Management**: Secure login/logout with session persistence
+- **Password Security**: Bcrypt hashing and password complexity requirements
+- **Rate Limiting**: Protection against brute force attacks
+
 ## 🛠️ Development
 
-### Local Development (without Docker)
-1. Open `index.html` in a web browser
-2. Use a local server like Python's `http.server` for testing:
+### Local Development Setup
+
+1. **Install dependencies:**
    ```bash
-   python3 -m http.server 8000
+   npm install
    ```
 
+2. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. **Initialize the database:**
+   ```bash
+   node -e "require('./database/init').initDatabase()"
+   ```
+
+4. **Start the development server:**
+   ```bash
+   npm run dev
+   # or for production:
+   npm start
+   ```
+
+5. **Access the application:**
+   - Website: `http://localhost:3000`
+   - Admin login: `jmcconocha@abydosone.ltd` / `TempAdmin123!`
+
+### Environment Configuration
+
+Required environment variables (see `.env.example`):
+- `JWT_SECRET`: Secret key for JWT token signing
+- `SMTP_*`: Email server configuration for notifications
+- `ADMIN_EMAIL`: Administrator email address
+- `DATABASE_PATH`: Path to SQLite database file
+
 ### Making Changes
-1. Edit the HTML, CSS, or JavaScript files
-2. Rebuild the Docker container:
+1. Edit source files in `public/`, `routes/`, `middleware/`, etc.
+2. Server automatically restarts with `npm run dev` (nodemon)
+3. For Docker deployment:
    ```bash
    docker-compose down
    docker-compose build --no-cache
@@ -95,11 +179,26 @@ TheAmplitudeInstitute/
 
 ## 📊 Technical Specifications
 
-- **Web Server**: Nginx (Alpine Linux)
-- **Container Runtime**: Docker
-- **Performance**: Gzip compression, static asset caching
-- **Security**: Security headers, hidden server tokens
-- **Monitoring**: Health checks and logging
+### Backend Stack
+- **Runtime**: Node.js 18+ with Express.js
+- **Database**: SQLite (development) / PostgreSQL (production)
+- **Authentication**: JWT tokens with HTTP-only cookies
+- **Security**: Helmet.js, CORS, rate limiting, bcrypt hashing
+- **Email**: Nodemailer with SMTP support
+- **Validation**: Express-validator with custom rules
+
+### Frontend Stack  
+- **UI Framework**: Vanilla JavaScript with responsive design
+- **CSS**: Modern CSS with gradients, flexbox, and grid
+- **Icons**: Font Awesome 6.0
+- **Fonts**: Google Fonts (Inter)
+- **Notifications**: Custom toast notification system
+
+### Deployment Options
+- **Development**: SQLite database, local SMTP testing
+- **Production**: PostgreSQL database, cloud SMTP services
+- **Docker**: Multi-stage builds with Nginx proxy
+- **Render**: Auto-deployment with PostgreSQL database
 
 ## 🔧 Configuration
 
@@ -114,7 +213,9 @@ TheAmplitudeInstitute/
 
 ## 🚀 Deployment Options
 
-### 🌟 Render.com Deployment (Free Tier - Recommended)
+### 🌟 Render.com Deployment (Free Tier - Now Supported!)
+
+The authentication system is now fully compatible with Render's free tier using PostgreSQL:
 
 The easiest way to deploy this website is using Render's free tier:
 
@@ -134,20 +235,47 @@ git push -u origin main
 1. Go to [render.com](https://render.com) and sign up with GitHub
 2. Click "New +" → "Blueprint"
 3. Connect your GitHub repository
-4. Render will automatically detect the `render.yaml` file
+4. Render will automatically detect the `render.yaml` file and create:
+   - **Node.js Web Service**: Runs the Express.js authentication server
+   - **PostgreSQL Database**: Free tier database for user data persistence
 5. Click "Apply" to deploy
+
+The blueprint automatically configures:
+- JWT secret generation
+- PostgreSQL database connection
+- Admin user creation
+- All necessary environment variables
 
 #### Step 3: Access Your Site
 - Your site will be available at: `https://amplitude-institute.onrender.com`
 - Deployment takes 2-5 minutes
 - Free tier sleeps after 15 minutes of inactivity
+- **Admin Login**: Use `jmcconocha@abydosone.ltd` / `TempAdmin123!`
+
+#### Step 4: Configure Email (Optional)
+Email notifications require SMTP configuration. Add these environment variables in Render:
+
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+```
+
+**Email Service Options:**
+- **Gmail**: Free, use app-specific password
+- **SendGrid**: 100 emails/day free
+- **Mailgun**: 10,000 emails/month free
+- **Skip**: System works without email (no notifications)
 
 #### Render Features
 - ✅ **Free HTTPS/SSL certificate**
-- ✅ **Automatic deployments** on GitHub push
-- ✅ **Custom domain support** (paid plans)
+- ✅ **Automatic deployments** on GitHub push  
+- ✅ **PostgreSQL database** (1GB free, persistent storage)
+- ✅ **Node.js service** (750 hours/month free)
 - ✅ **Zero configuration** - works with render.yaml
-- ✅ **Integrated with GitHub**
+- ✅ **Environment variables** auto-configured
+- ✅ **Custom domain support** (paid plans)
 
 #### Managing Your Deployment
 - **Render Dashboard**: [https://dashboard.render.com](https://dashboard.render.com)

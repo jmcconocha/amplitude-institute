@@ -141,7 +141,7 @@ router.get('/users', async (req, res) => {
 });
 
 // Get pending registration requests
-router.get('/registration-requests', (req, res) => {
+router.get('/registration-requests', async (req, res) => {
   const db = getDatabase();
   
   const query = `
@@ -155,20 +155,42 @@ router.get('/registration-requests', (req, res) => {
     ORDER BY u.created_at DESC
   `;
 
-  db.all(query, [], (err, requests) => {
-    if (err) {
+  if (dbType === 'postgresql') {
+    const client = await db.connect();
+    
+    try {
+      const result = await client.query(query);
+      
+      res.json({
+        success: true,
+        data: result.rows
+      });
+    } catch (err) {
       console.error('Error fetching registration requests:', err);
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message: 'Database error'
       });
+    } finally {
+      client.release();
     }
+  } else {
+    // SQLite version
+    db.all(query, [], (err, requests) => {
+      if (err) {
+        console.error('Error fetching registration requests:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Database error'
+        });
+      }
 
-    res.json({
-      success: true,
-      data: requests
+      res.json({
+        success: true,
+        data: requests
+      });
     });
-  });
+  }
 });
 
 // Approve user registration
@@ -177,72 +199,134 @@ router.post('/users/:id/approve', async (req, res) => {
   const { notes } = req.body;
   const db = getDatabase();
 
-  // Get user details first
-  db.get('SELECT * FROM users WHERE id = ?', [userId], async (err, user) => {
-    if (err) {
-      console.error('Error finding user:', err);
-      return res.status(500).json({
-        success: false,
-        message: 'Database error'
-      });
-    }
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.status !== 'pending') {
-      return res.status(400).json({
-        success: false,
-        message: 'User is not pending approval'
-      });
-    }
-
-    // Update user status
-    db.run(`
-      UPDATE users 
-      SET status = 'approved', approved_at = CURRENT_TIMESTAMP, approved_by = ?
-      WHERE id = ?
-    `, [req.user.id, userId], function(err) {
-      if (err) {
-        console.error('Error approving user:', err);
-        return res.status(500).json({
+  if (dbType === 'postgresql') {
+    const client = await db.connect();
+    
+    try {
+      // Get user details first
+      const userResult = await client.query('SELECT * FROM users WHERE id = $1', [userId]);
+      const user = userResult.rows[0];
+      
+      if (!user) {
+        return res.status(404).json({
           success: false,
-          message: 'Error approving user'
+          message: 'User not found'
         });
       }
 
+      if (user.status !== 'pending') {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not pending approval'
+        });
+      }
+
+      // Update user status
+      await client.query(`
+        UPDATE users 
+        SET status = 'approved', approved_at = CURRENT_TIMESTAMP, approved_by = $1
+        WHERE id = $2
+      `, [req.user.id, userId]);
+
       // Update registration request
-      db.run(`
+      await client.query(`
         UPDATE registration_requests 
         SET status = 'approved', processed_at = CURRENT_TIMESTAMP, 
-            processed_by = ?, admin_notes = ?
-        WHERE user_id = ?
-      `, [req.user.id, notes, userId], async (err) => {
+            processed_by = $1, admin_notes = $2
+        WHERE user_id = $3
+      `, [req.user.id, notes, userId]);
+
+      // Send approval email
+      try {
+        await emailService.sendApprovalNotification(
+          user.email, 
+          `${user.first_name} ${user.last_name}`
+        );
+      } catch (emailError) {
+        console.error('Failed to send approval email:', emailError);
+      }
+
+      res.json({
+        success: true,
+        message: 'User approved successfully'
+      });
+    } catch (err) {
+      console.error('Error approving user:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Database error'
+      });
+    } finally {
+      client.release();
+    }
+  } else {
+    // SQLite version
+    db.get('SELECT * FROM users WHERE id = ?', [userId], async (err, user) => {
+      if (err) {
+        console.error('Error finding user:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Database error'
+        });
+      }
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      if (user.status !== 'pending') {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not pending approval'
+        });
+      }
+
+      // Update user status
+      db.run(`
+        UPDATE users 
+        SET status = 'approved', approved_at = CURRENT_TIMESTAMP, approved_by = ?
+        WHERE id = ?
+      `, [req.user.id, userId], function(err) {
         if (err) {
-          console.error('Error updating registration request:', err);
+          console.error('Error approving user:', err);
+          return res.status(500).json({
+            success: false,
+            message: 'Error approving user'
+          });
         }
 
-        // Send approval email
-        try {
-          await emailService.sendApprovalNotification(
-            user.email, 
-            `${user.first_name} ${user.last_name}`
-          );
-        } catch (emailError) {
-          console.error('Failed to send approval email:', emailError);
-        }
+        // Update registration request
+        db.run(`
+          UPDATE registration_requests 
+          SET status = 'approved', processed_at = CURRENT_TIMESTAMP, 
+              processed_by = ?, admin_notes = ?
+          WHERE user_id = ?
+        `, [req.user.id, notes, userId], async (err) => {
+          if (err) {
+            console.error('Error updating registration request:', err);
+          }
 
-        res.json({
-          success: true,
-          message: 'User approved successfully'
+          // Send approval email
+          try {
+            await emailService.sendApprovalNotification(
+              user.email, 
+              `${user.first_name} ${user.last_name}`
+            );
+          } catch (emailError) {
+            console.error('Failed to send approval email:', emailError);
+          }
+
+          res.json({
+            success: true,
+            message: 'User approved successfully'
+          });
         });
       });
     });
-  });
+  }
 });
 
 // Deny user registration
@@ -251,108 +335,204 @@ router.post('/users/:id/deny', async (req, res) => {
   const { reason, notes } = req.body;
   const db = getDatabase();
 
-  // Get user details first
-  db.get('SELECT * FROM users WHERE id = ?', [userId], async (err, user) => {
-    if (err) {
-      console.error('Error finding user:', err);
-      return res.status(500).json({
-        success: false,
-        message: 'Database error'
-      });
-    }
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.status !== 'pending') {
-      return res.status(400).json({
-        success: false,
-        message: 'User is not pending approval'
-      });
-    }
-
-    // Update user status
-    db.run(`
-      UPDATE users 
-      SET status = 'blocked'
-      WHERE id = ?
-    `, [userId], function(err) {
-      if (err) {
-        console.error('Error denying user:', err);
-        return res.status(500).json({
+  if (dbType === 'postgresql') {
+    const client = await db.connect();
+    
+    try {
+      // Get user details first
+      const userResult = await client.query('SELECT * FROM users WHERE id = $1', [userId]);
+      const user = userResult.rows[0];
+      
+      if (!user) {
+        return res.status(404).json({
           success: false,
-          message: 'Error denying user'
+          message: 'User not found'
         });
       }
 
+      if (user.status !== 'pending') {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not pending approval'
+        });
+      }
+
+      // Update user status
+      await client.query(`
+        UPDATE users 
+        SET status = 'blocked'
+        WHERE id = $1
+      `, [userId]);
+
       // Update registration request
-      db.run(`
+      await client.query(`
         UPDATE registration_requests 
         SET status = 'denied', processed_at = CURRENT_TIMESTAMP, 
-            processed_by = ?, admin_notes = ?
-        WHERE user_id = ?
-      `, [req.user.id, notes, userId], async (err) => {
+            processed_by = $1, admin_notes = $2
+        WHERE user_id = $3
+      `, [req.user.id, notes, userId]);
+
+      // Send denial email
+      try {
+        await emailService.sendDenialNotification(
+          user.email, 
+          `${user.first_name} ${user.last_name}`,
+          reason
+        );
+      } catch (emailError) {
+        console.error('Failed to send denial email:', emailError);
+      }
+
+      res.json({
+        success: true,
+        message: 'User registration denied'
+      });
+    } catch (err) {
+      console.error('Error denying user:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Database error'
+      });
+    } finally {
+      client.release();
+    }
+  } else {
+    // SQLite version
+    db.get('SELECT * FROM users WHERE id = ?', [userId], async (err, user) => {
+      if (err) {
+        console.error('Error finding user:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Database error'
+        });
+      }
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      if (user.status !== 'pending') {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not pending approval'
+        });
+      }
+
+      // Update user status
+      db.run(`
+        UPDATE users 
+        SET status = 'blocked'
+        WHERE id = ?
+      `, [userId], function(err) {
         if (err) {
-          console.error('Error updating registration request:', err);
+          console.error('Error denying user:', err);
+          return res.status(500).json({
+            success: false,
+            message: 'Error denying user'
+          });
         }
 
-        // Send denial email
-        try {
-          await emailService.sendDenialNotification(
-            user.email, 
-            `${user.first_name} ${user.last_name}`,
-            reason
-          );
-        } catch (emailError) {
-          console.error('Failed to send denial email:', emailError);
-        }
+        // Update registration request
+        db.run(`
+          UPDATE registration_requests 
+          SET status = 'denied', processed_at = CURRENT_TIMESTAMP, 
+              processed_by = ?, admin_notes = ?
+          WHERE user_id = ?
+        `, [req.user.id, notes, userId], async (err) => {
+          if (err) {
+            console.error('Error updating registration request:', err);
+          }
 
-        res.json({
-          success: true,
-          message: 'User registration denied'
+          // Send denial email
+          try {
+            await emailService.sendDenialNotification(
+              user.email, 
+              `${user.first_name} ${user.last_name}`,
+              reason
+            );
+          } catch (emailError) {
+            console.error('Failed to send denial email:', emailError);
+          }
+
+          res.json({
+            success: true,
+            message: 'User registration denied'
+          });
         });
       });
     });
-  });
+  }
 });
 
 // Block/Unblock user
-router.post('/users/:id/block', (req, res) => {
+router.post('/users/:id/block', async (req, res) => {
   const userId = parseInt(req.params.id);
   const { block } = req.body; // true to block, false to unblock
   const db = getDatabase();
 
   const newStatus = block ? 'blocked' : 'approved';
   
-  db.run(`
-    UPDATE users 
-    SET status = ?
-    WHERE id = ? AND id != ?
-  `, [newStatus, userId, req.user.id], function(err) {
-    if (err) {
+  if (dbType === 'postgresql') {
+    const client = await db.connect();
+    
+    try {
+      const result = await client.query(`
+        UPDATE users 
+        SET status = $1
+        WHERE id = $2 AND id != $3
+      `, [newStatus, userId, req.user.id]);
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found or cannot modify own account'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: `User ${block ? 'blocked' : 'unblocked'} successfully`
+      });
+    } catch (err) {
       console.error('Error updating user status:', err);
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message: 'Database error'
       });
+    } finally {
+      client.release();
     }
+  } else {
+    // SQLite version
+    db.run(`
+      UPDATE users 
+      SET status = ?
+      WHERE id = ? AND id != ?
+    `, [newStatus, userId, req.user.id], function(err) {
+      if (err) {
+        console.error('Error updating user status:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Database error'
+        });
+      }
 
-    if (this.changes === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found or cannot modify own account'
+      if (this.changes === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found or cannot modify own account'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: `User ${block ? 'blocked' : 'unblocked'} successfully`
       });
-    }
-
-    res.json({
-      success: true,
-      message: `User ${block ? 'blocked' : 'unblocked'} successfully`
     });
-  });
+  }
 });
 
 // Get dashboard statistics
@@ -439,6 +619,121 @@ router.get('/stats', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Database error'
+    });
+  }
+});
+
+// Delete user permanently
+router.delete('/users/:id', async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const db = getDatabase();
+
+  if (dbType === 'postgresql') {
+    const client = await db.connect();
+    
+    try {
+      // Check if user exists and is not an admin
+      const userResult = await client.query('SELECT role FROM users WHERE id = $1', [userId]);
+      const user = userResult.rows[0];
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      if (user.role === 'admin') {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot delete admin users'
+        });
+      }
+
+      if (userId === req.user.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot delete your own account'
+        });
+      }
+
+      // Delete user (cascading will handle registration_requests and sessions)
+      const deleteResult = await client.query('DELETE FROM users WHERE id = $1', [userId]);
+
+      if (deleteResult.rowCount === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'User deleted successfully'
+      });
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Database error'
+      });
+    } finally {
+      client.release();
+    }
+  } else {
+    // SQLite version
+    db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+      if (err) {
+        console.error('Error finding user:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Database error'
+        });
+      }
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      if (user.role === 'admin') {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot delete admin users'
+        });
+      }
+
+      if (userId === req.user.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot delete your own account'
+        });
+      }
+
+      // Delete user
+      db.run('DELETE FROM users WHERE id = ?', [userId], function(err) {
+        if (err) {
+          console.error('Error deleting user:', err);
+          return res.status(500).json({
+            success: false,
+            message: 'Database error'
+          });
+        }
+
+        if (this.changes === 0) {
+          return res.status(404).json({
+            success: false,
+            message: 'User not found'
+          });
+        }
+
+        res.json({
+          success: true,
+          message: 'User deleted successfully'
+        });
+      });
     });
   }
 });

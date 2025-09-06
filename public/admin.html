@@ -370,30 +370,40 @@
         
         async function loadUsers() {
             try {
+                console.log('🔄 Loading users and stats...');
+                
                 // Load users and stats in parallel
                 const [usersResponse, statsResponse] = await Promise.all([
                     fetch('/api/admin/users', { credentials: 'include' }),
                     fetch('/api/admin/stats', { credentials: 'include' })
                 ]);
                 
+                console.log('📊 Users response status:', usersResponse.status);
+                console.log('📊 Stats response status:', statsResponse.status);
+                
                 const usersData = await usersResponse.json();
                 const statsData = await statsResponse.json();
                 
+                console.log('👥 Users data:', usersData);
+                console.log('📈 Stats data:', statsData);
+                
                 if (usersData.success) {
                     users = usersData.data.users;
+                    console.log('✅ Loaded users:', users.length);
                     renderPendingUsers();
                     renderAllUsers();
                 } else {
+                    console.error('❌ Failed to load users:', usersData.message);
                     showNotification('Failed to load users', 'error');
                 }
                 
                 if (statsData.success) {
                     updateStatistics(statsData.data);
                 } else {
-                    console.error('Failed to load statistics');
+                    console.error('❌ Failed to load statistics:', statsData.message);
                 }
             } catch (error) {
-                console.error('Failed to load data:', error);
+                console.error('❌ Failed to load data:', error);
                 showNotification('Network error loading data', 'error');
             }
         }
@@ -541,10 +551,14 @@
         }
         
         async function approveUser(userId) {
+            console.log('✅ Approve user clicked for ID:', userId);
+            
             if (!confirm('Approve this user registration?')) return;
             
             const notes = prompt('Add any approval notes (optional):');
             if (notes === null && !confirm('Continue approval without notes?')) return;
+            
+            console.log('📝 Approving user with notes:', notes);
             
             try {
                 const response = await fetch(`/api/admin/users/${userId}/approve`, {

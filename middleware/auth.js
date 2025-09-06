@@ -113,25 +113,19 @@ async function requireAuth(req, res, next) {
 
 // Middleware to check if user is admin
 function requireAdmin(req, res, next) {
+  console.log('requireAdmin middleware - user:', req.user ? `${req.user.email} (role: ${req.user.role})` : 'none');
+  
   if (!req.user || req.user.role !== 'admin') {
+    console.log('Admin access denied - redirecting to home');
     if (req.accepts('html')) {
-      return res.status(403).send(`
-        <!DOCTYPE html>
-        <html>
-        <head><title>Access Denied</title></head>
-        <body>
-          <h1>Access Denied</h1>
-          <p>You do not have permission to access this resource.</p>
-          <a href="/">Return to Home</a>
-        </body>
-        </html>
-      `);
+      return res.redirect('/?error=admin_required');
     }
     return res.status(403).json({ 
       success: false, 
       message: 'Access denied. Admin privileges required.' 
     });
   }
+  console.log('Admin access granted');
   next();
 }
 

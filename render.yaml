@@ -33,7 +33,7 @@ services:
     # Scaling (free tier limitations)
     numInstances: 1
     
-    # Auto-deploy settings
+    # Auto-deploy settings  
     autoDeploy: true
 
 databases:

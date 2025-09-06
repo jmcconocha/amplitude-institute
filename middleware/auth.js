@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { getDatabase, dbType } = require('../database/adapter');
 
 // Middleware to check if user is authenticated
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const token = req.cookies.auth_token;
   
   if (!token) {
@@ -23,42 +23,42 @@ function requireAuth(req, res, next) {
     
     if (dbType === 'postgresql') {
       // PostgreSQL version
-      db.connect().then(client => {
-        client.query(
+      try {
+        const client = await db.connect();
+        const result = await client.query(
           'SELECT id, email, role, status, first_name, last_name FROM users WHERE id = $1 AND status = $2',
           [decoded.userId, 'approved']
-        ).then(result => {
-          const user = result.rows[0];
-          
-          if (!user) {
-            res.clearCookie('auth_token');
-            if (req.accepts('html')) {
-              return res.redirect('/login');
-            }
-            return res.status(401).json({ 
-              success: false, 
-              message: 'Invalid token or user not approved' 
-            });
+        );
+        const user = result.rows[0];
+        
+        if (!user) {
+          res.clearCookie('auth_token');
+          client.release();
+          if (req.accepts('html')) {
+            return res.redirect('/login');
           }
-          
-          // Update last accessed time
-          client.query(
-            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
-            [user.id]
-          );
-          
-          client.release();
-          req.user = user;
-          next();
-        }).catch(err => {
-          console.error('Database error in auth middleware:', err);
-          client.release();
-          return res.status(500).json({ 
+          return res.status(401).json({ 
             success: false, 
-            message: 'Database error' 
+            message: 'Invalid token or user not approved' 
           });
+        }
+        
+        // Update last accessed time
+        await client.query(
+          'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
+          [user.id]
+        );
+        
+        client.release();
+        req.user = user;
+        next();
+      } catch (err) {
+        console.error('Database error in auth middleware:', err);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Database error' 
         });
-      });
+      }
     } else {
       // SQLite version
       db.get(
@@ -136,7 +136,7 @@ function requireAdmin(req, res, next) {
 }
 
 // Middleware to optionally check auth (doesn't redirect if not authenticated)
-function optionalAuth(req, res, next) {
+async function optionalAuth(req, res, next) {
   const token = req.cookies.auth_token;
   
   if (!token) {
@@ -150,27 +150,26 @@ function optionalAuth(req, res, next) {
     
     if (dbType === 'postgresql') {
       // PostgreSQL version
-      db.connect().then(client => {
-        client.query(
+      try {
+        const client = await db.connect();
+        const result = await client.query(
           'SELECT id, email, role, status, first_name, last_name FROM users WHERE id = $1 AND status = $2',
           [decoded.userId, 'approved']
-        ).then(result => {
-          const user = result.rows[0];
-          if (!user) {
-            res.clearCookie('auth_token');
-            req.user = null;
-          } else {
-            req.user = user;
-          }
-          client.release();
-          next();
-        }).catch(err => {
+        );
+        const user = result.rows[0];
+        if (!user) {
           res.clearCookie('auth_token');
           req.user = null;
-          client.release();
-          next();
-        });
-      });
+        } else {
+          req.user = user;
+        }
+        client.release();
+        next();
+      } catch (err) {
+        res.clearCookie('auth_token');
+        req.user = null;
+        next();
+      }
     } else {
       // SQLite version
       db.get(

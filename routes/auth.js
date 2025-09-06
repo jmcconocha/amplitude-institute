@@ -199,7 +199,7 @@ router.post('/register', [
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty()
-], (req, res) => {
+], async (req, res) => {
   try {
     // Validate input
     const errors = validationResult(req);

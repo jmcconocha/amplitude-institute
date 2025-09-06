@@ -3,9 +3,96 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
-const { getDatabase } = require('../database/adapter');
+const { getDatabase, dbType } = require('../database/adapter');
 const emailService = require('../services/email');
 const { optionalAuth } = require('../middleware/auth');
+
+// Helper function to handle user login logic
+async function handleUserLogin(user, password, res, dbClient = null) {
+  if (!user) {
+    if (dbClient) dbClient.release();
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid email or password'
+    });
+  }
+
+  // Check if user is approved
+  if (user.status !== 'approved') {
+    if (dbClient) dbClient.release();
+    return res.status(403).json({
+      success: false,
+      message: 'Account is pending approval or has been blocked'
+    });
+  }
+
+  try {
+    // Verify password - handle both 'password' and 'password_hash' column names
+    const passwordHash = user.password || user.password_hash;
+    const isValidPassword = await bcrypt.compare(password, passwordHash);
+    
+    if (!isValidPassword) {
+      if (dbClient) dbClient.release();
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        userId: user.id,
+        email: user.email,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+
+    // Set secure cookie
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    // Update last login
+    if (dbClient) {
+      await dbClient.query(
+        'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
+        [user.id]
+      );
+      dbClient.release();
+    } else {
+      const db = getDatabase();
+      db.run(
+        'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
+        [user.id]
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        role: user.role
+      }
+    });
+  } catch (bcryptError) {
+    console.error('Password comparison error:', bcryptError);
+    if (dbClient) dbClient.release();
+    res.status(500).json({
+      success: false,
+      message: 'Authentication error'
+    });
+  }
+}
 
 // Registration endpoint
 router.post('/register', [
@@ -126,90 +213,43 @@ router.post('/login', [
     const { email, password } = req.body;
     const db = getDatabase();
 
-    // Find user
-    db.get(
-      'SELECT id, email, password_hash, first_name, last_name, role, status FROM users WHERE email = ?',
-      [email],
-      async (err, user) => {
-        if (err) {
-          console.error('Database error:', err);
-          return res.status(500).json({
-            success: false,
-            message: 'Database error'
-          });
-        }
-
-        if (!user) {
-          return res.status(401).json({
-            success: false,
-            message: 'Invalid email or password'
-          });
-        }
-
-        // Check if user is approved
-        if (user.status !== 'approved') {
-          return res.status(403).json({
-            success: false,
-            message: 'Account is pending approval or has been blocked'
-          });
-        }
-
-        try {
-          // Verify password
-          const isValidPassword = await bcrypt.compare(password, user.password_hash);
-          
-          if (!isValidPassword) {
-            return res.status(401).json({
+    if (dbType === 'postgresql') {
+      // PostgreSQL version
+      const client = await db.connect();
+      try {
+        const result = await client.query(
+          'SELECT id, email, password, first_name, last_name, role, status FROM users WHERE email = $1',
+          [email]
+        );
+        const user = result.rows[0];
+        
+        await handleUserLogin(user, password, res, client);
+      } catch (err) {
+        console.error('Database error:', err);
+        client.release();
+        return res.status(500).json({
+          success: false,
+          message: 'Database error'
+        });
+      }
+    } else {
+      // SQLite version
+      db.get(
+        'SELECT id, email, password_hash, first_name, last_name, role, status FROM users WHERE email = ?',
+        [email],
+        async (err, user) => {
+          if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({
               success: false,
-              message: 'Invalid email or password'
+              message: 'Database error'
             });
           }
-
-          // Generate JWT token
-          const token = jwt.sign(
-            { 
-              userId: user.id,
-              email: user.email,
-              role: user.role
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-          );
-
-          // Set secure cookie
-          res.cookie('auth_token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-          });
-
-          // Update last login
-          db.run(
-            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
-            [user.id]
-          );
-
-          res.json({
-            success: true,
-            message: 'Login successful',
-            user: {
-              id: user.id,
-              email: user.email,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              role: user.role
-            }
-          });
-        } catch (bcryptError) {
-          console.error('Password comparison error:', bcryptError);
-          res.status(500).json({
-            success: false,
-            message: 'Authentication error'
-          });
+          
+          await handleUserLogin(user, password, res);
         }
-      }
-    );
+      );
+    }
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({

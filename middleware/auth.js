@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { getDatabase } = require('../database/init');
+const { getDatabase, dbType } = require('../database/adapter');
 
 // Middleware to check if user is authenticated
 function requireAuth(req, res, next) {
@@ -21,42 +21,82 @@ function requireAuth(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const db = getDatabase();
     
-    // Check if user still exists and is approved
-    db.get(
-      'SELECT id, email, role, status, first_name, last_name FROM users WHERE id = ? AND status = ?',
-      [decoded.userId, 'approved'],
-      (err, user) => {
-        if (err) {
+    if (dbType === 'postgresql') {
+      // PostgreSQL version
+      db.connect().then(client => {
+        client.query(
+          'SELECT id, email, role, status, first_name, last_name FROM users WHERE id = $1 AND status = $2',
+          [decoded.userId, 'approved']
+        ).then(result => {
+          const user = result.rows[0];
+          
+          if (!user) {
+            res.clearCookie('auth_token');
+            if (req.accepts('html')) {
+              return res.redirect('/login');
+            }
+            return res.status(401).json({ 
+              success: false, 
+              message: 'Invalid token or user not approved' 
+            });
+          }
+          
+          // Update last accessed time
+          client.query(
+            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
+            [user.id]
+          );
+          
+          client.release();
+          req.user = user;
+          next();
+        }).catch(err => {
           console.error('Database error in auth middleware:', err);
+          client.release();
           return res.status(500).json({ 
             success: false, 
             message: 'Database error' 
           });
-        }
-        
-        if (!user) {
-          // Clear invalid cookie
-          res.clearCookie('auth_token');
-          if (req.accepts('html')) {
-            return res.redirect('/login');
+        });
+      });
+    } else {
+      // SQLite version
+      db.get(
+        'SELECT id, email, role, status, first_name, last_name FROM users WHERE id = ? AND status = ?',
+        [decoded.userId, 'approved'],
+        (err, user) => {
+          if (err) {
+            console.error('Database error in auth middleware:', err);
+            return res.status(500).json({ 
+              success: false, 
+              message: 'Database error' 
+            });
           }
-          return res.status(401).json({ 
-            success: false, 
-            message: 'Invalid token or user not approved' 
-          });
+          
+          if (!user) {
+            // Clear invalid cookie
+            res.clearCookie('auth_token');
+            if (req.accepts('html')) {
+              return res.redirect('/login');
+            }
+            return res.status(401).json({ 
+              success: false, 
+              message: 'Invalid token or user not approved' 
+            });
+          }
+          
+          // Update last accessed time
+          db.run(
+            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
+            [user.id]
+          );
+          
+          // Add user to request object
+          req.user = user;
+          next();
         }
-        
-        // Update last accessed time
-        db.run(
-          'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
-          [user.id]
-        );
-        
-        // Add user to request object
-        req.user = user;
-        next();
-      }
-    );
+      );
+    }
   } catch (error) {
     console.error('JWT verification error:', error);
     res.clearCookie('auth_token');
@@ -108,19 +148,45 @@ function optionalAuth(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const db = getDatabase();
     
-    db.get(
-      'SELECT id, email, role, status, first_name, last_name FROM users WHERE id = ? AND status = ?',
-      [decoded.userId, 'approved'],
-      (err, user) => {
-        if (err || !user) {
+    if (dbType === 'postgresql') {
+      // PostgreSQL version
+      db.connect().then(client => {
+        client.query(
+          'SELECT id, email, role, status, first_name, last_name FROM users WHERE id = $1 AND status = $2',
+          [decoded.userId, 'approved']
+        ).then(result => {
+          const user = result.rows[0];
+          if (!user) {
+            res.clearCookie('auth_token');
+            req.user = null;
+          } else {
+            req.user = user;
+          }
+          client.release();
+          next();
+        }).catch(err => {
           res.clearCookie('auth_token');
           req.user = null;
-        } else {
-          req.user = user;
+          client.release();
+          next();
+        });
+      });
+    } else {
+      // SQLite version
+      db.get(
+        'SELECT id, email, role, status, first_name, last_name FROM users WHERE id = ? AND status = ?',
+        [decoded.userId, 'approved'],
+        (err, user) => {
+          if (err || !user) {
+            res.clearCookie('auth_token');
+            req.user = null;
+          } else {
+            req.user = user;
+          }
+          next();
         }
-        next();
-      }
-    );
+      );
+    }
   } catch (error) {
     res.clearCookie('auth_token');
     req.user = null;

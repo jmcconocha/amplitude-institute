@@ -58,14 +58,22 @@ app.use(cookieParser());
 
 // API routes
 app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', authMiddleware.requireAuth, authMiddleware.requireAdmin, adminRoutes);
 
-// Serve static files (protect with auth for main site)
-app.use('/login', express.static(path.join(__dirname, 'public')));
-app.use('/register', express.static(path.join(__dirname, 'public')));
-app.use('/admin', express.static(path.join(__dirname, 'public')));
+// Public routes (no authentication required)
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
 
-// Protect all other routes with authentication
+// Protected admin routes
+app.get('/admin*', authMiddleware.requireAuth, authMiddleware.requireAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Protected static files and main site
 app.use('/', authMiddleware.requireAuth, express.static(path.join(__dirname, 'public')));
 
 // Fallback for protected routes

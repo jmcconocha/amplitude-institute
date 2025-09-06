@@ -356,44 +356,91 @@ router.post('/users/:id/block', (req, res) => {
 });
 
 // Get dashboard statistics
-router.get('/stats', (req, res) => {
-  const db = getDatabase();
-  
-  const queries = [
-    'SELECT COUNT(*) as total FROM users',
-    'SELECT COUNT(*) as pending FROM users WHERE status = "pending"',
-    'SELECT COUNT(*) as approved FROM users WHERE status = "approved"',
-    'SELECT COUNT(*) as blocked FROM users WHERE status = "blocked"',
-    'SELECT COUNT(*) as admins FROM users WHERE role = "admin"',
-    'SELECT COUNT(*) as today FROM users WHERE date(created_at) = date("now")'
-  ];
+router.get('/stats', async (req, res) => {
+  try {
+    const db = getDatabase();
+    
+    if (dbType === 'postgresql') {
+      const queries = [
+        'SELECT COUNT(*) as total FROM users',
+        'SELECT COUNT(*) as pending FROM users WHERE status = $1',
+        'SELECT COUNT(*) as approved FROM users WHERE status = $1',
+        'SELECT COUNT(*) as blocked FROM users WHERE status = $1',
+        'SELECT COUNT(*) as admins FROM users WHERE role = $1',
+        'SELECT COUNT(*) as today FROM users WHERE DATE(created_at) = CURRENT_DATE'
+      ];
 
-  Promise.all(queries.map(query => 
-    new Promise((resolve, reject) => {
-      db.get(query, [], (err, result) => {
-        if (err) reject(err);
-        else resolve(Object.values(result)[0]);
-      });
-    })
-  )).then(results => {
-    res.json({
-      success: true,
-      data: {
-        totalUsers: results[0],
-        pendingUsers: results[1],
-        approvedUsers: results[2],
-        blockedUsers: results[3],
-        adminUsers: results[4],
-        todayRegistrations: results[5]
+      const client = await db.connect();
+      
+      try {
+        const results = await Promise.all([
+          client.query(queries[0]),
+          client.query(queries[1], ['pending']),
+          client.query(queries[2], ['approved']),
+          client.query(queries[3], ['blocked']),
+          client.query(queries[4], ['admin']),
+          client.query(queries[5])
+        ]);
+
+        res.json({
+          success: true,
+          data: {
+            totalUsers: parseInt(results[0].rows[0].total),
+            pendingUsers: parseInt(results[1].rows[0].pending),
+            approvedUsers: parseInt(results[2].rows[0].approved),
+            blockedUsers: parseInt(results[3].rows[0].blocked),
+            adminUsers: parseInt(results[4].rows[0].admins),
+            todayRegistrations: parseInt(results[5].rows[0].today)
+          }
+        });
+      } finally {
+        client.release();
       }
-    });
-  }).catch(err => {
-    console.error('Error fetching stats:', err);
+    } else {
+      // SQLite version
+      const queries = [
+        'SELECT COUNT(*) as total FROM users',
+        'SELECT COUNT(*) as pending FROM users WHERE status = "pending"',
+        'SELECT COUNT(*) as approved FROM users WHERE status = "approved"',
+        'SELECT COUNT(*) as blocked FROM users WHERE status = "blocked"',
+        'SELECT COUNT(*) as admins FROM users WHERE role = "admin"',
+        'SELECT COUNT(*) as today FROM users WHERE date(created_at) = date("now")'
+      ];
+
+      Promise.all(queries.map(query => 
+        new Promise((resolve, reject) => {
+          db.get(query, [], (err, result) => {
+            if (err) reject(err);
+            else resolve(Object.values(result)[0]);
+          });
+        })
+      )).then(results => {
+        res.json({
+          success: true,
+          data: {
+            totalUsers: results[0],
+            pendingUsers: results[1],
+            approvedUsers: results[2],
+            blockedUsers: results[3],
+            adminUsers: results[4],
+            todayRegistrations: results[5]
+          }
+        });
+      }).catch(error => {
+        console.error('Error fetching stats:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Database error'
+        });
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching stats:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching statistics'
+      message: 'Database error'
     });
-  });
+  }
 });
 
 module.exports = router;

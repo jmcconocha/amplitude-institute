@@ -1,35 +1,32 @@
-# Multi-stage build for optimal performance
-FROM node:18-alpine AS builder
+# Use Node.js runtime
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files (if we had any build process)
-# Since this is a static site, we'll just prepare the files
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install --only=production
+
+# Copy application code
 COPY . .
 
-# Production stage - use nginx for serving static files
-FROM nginx:alpine
+# Create a non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+# Change ownership of the app directory
+RUN chown -R nodejs:nodejs /app
+USER nodejs
 
-# Copy website files to nginx html directory
-COPY index.html research-community.html partnerships.html styles.css script.js /usr/share/nginx/html/
-
-# Create directory for logs
-RUN mkdir -p /var/log/nginx
-
-# Set proper permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
+# Expose the port the app runs on
+EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost/ || exit 1
+  CMD curl -f http://localhost:3000/ || exit 1
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start the application
+CMD ["npm", "start"]

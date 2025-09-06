@@ -123,6 +123,39 @@ body {
     width: 100%;
 }
 
+/* Logout Button */
+.logout-btn {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    font-weight: 500;
+    font-size: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0;
+}
+
+.logout-btn:hover {
+    color: #ef4444;
+}
+
+.logout-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    transition: width 0.3s ease;
+}
+
+.logout-btn:hover::after {
+    width: 100%;
+}
+
 .hamburger {
     display: none;
     flex-direction: column;

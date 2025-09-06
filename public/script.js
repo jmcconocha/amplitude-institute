@@ -382,6 +382,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     preloadImages();
+    
+    // Logout functionality
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Logged out successfully', 'success');
+                    // Redirect to login page after a short delay
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1000);
+                } else {
+                    showNotification('Logout failed: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                showNotification('Network error during logout', 'error');
+            }
+        });
+    }
 });
 
 // Performance monitoring (for development)

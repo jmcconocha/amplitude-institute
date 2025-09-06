@@ -71,13 +71,18 @@ app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
-// Protected admin routes
+// Protected static files (but exclude admin routes)
+app.use('/', authMiddleware.requireAuth, (req, res, next) => {
+  if (req.path.startsWith('/admin')) {
+    return next();
+  }
+  express.static(path.join(__dirname, 'public'))(req, res, next);
+});
+
+// Protected admin routes (must come after static middleware)
 app.get('/admin*', authMiddleware.requireAuth, authMiddleware.requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
-
-// Protected static files and main site
-app.use('/', authMiddleware.requireAuth, express.static(path.join(__dirname, 'public')));
 
 // Fallback for protected routes
 app.get('*', authMiddleware.requireAuth, (req, res) => {

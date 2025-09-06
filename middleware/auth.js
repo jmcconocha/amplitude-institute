@@ -8,7 +8,8 @@ async function requireAuth(req, res, next) {
   if (!token) {
     // Redirect to login page for HTML requests
     if (req.accepts('html')) {
-      return res.redirect('/login');
+      const redirectTo = encodeURIComponent(req.originalUrl);
+      return res.redirect(`/login?redirect=${redirectTo}`);
     }
     // Return JSON for API requests
     return res.status(401).json({ 
@@ -35,7 +36,8 @@ async function requireAuth(req, res, next) {
           res.clearCookie('auth_token');
           client.release();
           if (req.accepts('html')) {
-            return res.redirect('/login');
+            const redirectTo = encodeURIComponent(req.originalUrl);
+            return res.redirect(`/login?redirect=${redirectTo}`);
           }
           return res.status(401).json({ 
             success: false, 
@@ -77,7 +79,8 @@ async function requireAuth(req, res, next) {
             // Clear invalid cookie
             res.clearCookie('auth_token');
             if (req.accepts('html')) {
-              return res.redirect('/login');
+              const redirectTo = encodeURIComponent(req.originalUrl);
+              return res.redirect(`/login?redirect=${redirectTo}`);
             }
             return res.status(401).json({ 
               success: false, 
@@ -102,7 +105,8 @@ async function requireAuth(req, res, next) {
     res.clearCookie('auth_token');
     
     if (req.accepts('html')) {
-      return res.redirect('/login');
+      const redirectTo = encodeURIComponent(req.originalUrl);
+      return res.redirect(`/login?redirect=${redirectTo}`);
     }
     return res.status(401).json({ 
       success: false, 

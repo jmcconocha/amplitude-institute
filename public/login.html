@@ -275,7 +275,7 @@
                     if (data.success) {
                         showNotification('Login successful! Redirecting...', 'success');
                         setTimeout(() => {
-                            window.location.href = '/';
+                            window.location.href = redirectTo;
                         }, 1000);
                     } else {
                         showNotification(data.message || 'Login failed', 'error');
@@ -291,12 +291,15 @@
                 }
             });
             
-            // Check if already logged in
+            // Check if already logged in and handle redirects
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectTo = urlParams.get('redirect') || '/';
+            
             fetch('/api/auth/me', { credentials: 'include' })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.authenticated) {
-                        window.location.href = '/';
+                        window.location.href = redirectTo;
                     }
                 })
                 .catch(error => {

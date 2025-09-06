@@ -2,18 +2,40 @@ const nodemailer = require('nodemailer');
 
 class EmailService {
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    // Check if SMTP is configured
+    this.isConfigured = !!(
+      process.env.SMTP_HOST && 
+      process.env.SMTP_PORT && 
+      process.env.SMTP_USER && 
+      process.env.SMTP_PASS
+    );
+    
+    if (this.isConfigured) {
+      this.transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+    } else {
+      console.log('⚠️  SMTP not configured - emails will be logged instead of sent');
+      this.transporter = null;
+    }
   }
 
   async sendRegistrationNotification(userDetails) {
+    if (!this.isConfigured) {
+      console.log('📧 [SMTP NOT CONFIGURED] Would send registration notification:', {
+        to: process.env.ADMIN_EMAIL || 'admin@example.com',
+        user: `${userDetails.first_name} ${userDetails.last_name} (${userDetails.email})`,
+        organization: userDetails.organization
+      });
+      return { success: true, messageId: 'smtp-not-configured' };
+    }
+
     const { email, first_name, last_name, organization, registration_reason } = userDetails;
     
     const mailOptions = {
@@ -78,6 +100,14 @@ class EmailService {
   }
 
   async sendApprovalNotification(userEmail, userName) {
+    if (!this.isConfigured) {
+      console.log('📧 [SMTP NOT CONFIGURED] Would send approval notification:', {
+        to: userEmail,
+        user: userName
+      });
+      return { success: true, messageId: 'smtp-not-configured' };
+    }
+
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: userEmail,
@@ -141,6 +171,15 @@ class EmailService {
   }
 
   async sendDenialNotification(userEmail, userName, reason = '') {
+    if (!this.isConfigured) {
+      console.log('📧 [SMTP NOT CONFIGURED] Would send denial notification:', {
+        to: userEmail,
+        user: userName,
+        reason: reason
+      });
+      return { success: true, messageId: 'smtp-not-configured' };
+    }
+
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: userEmail,

@@ -117,75 +117,135 @@ router.post('/register', [
     const { email, password, first_name, last_name, organization, registration_reason } = req.body;
     const db = getDatabase();
 
-    // Check if user already exists
-    db.get('SELECT email FROM users WHERE email = ?', [email], async (err, existingUser) => {
-      if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({
-          success: false,
-          message: 'Database error'
-        });
-      }
-
-      if (existingUser) {
-        return res.status(400).json({
-          success: false,
-          message: 'User with this email already exists'
-        });
-      }
-
+    if (dbType === 'postgresql') {
+      // PostgreSQL version
+      const client = await db.connect();
+      
       try {
+        // Check if user already exists
+        const existingUserResult = await client.query('SELECT email FROM users WHERE email = $1', [email]);
+        
+        if (existingUserResult.rows.length > 0) {
+          client.release();
+          return res.status(400).json({
+            success: false,
+            message: 'User with this email already exists'
+          });
+        }
+
         // Hash password
         const passwordHash = await bcrypt.hash(password, 12);
 
         // Insert new user
-        db.run(`
-          INSERT INTO users (email, password_hash, first_name, last_name, organization, registration_reason, status)
-          VALUES (?, ?, ?, ?, ?, ?, 'pending')
-        `, [email, passwordHash, first_name, last_name, organization, registration_reason], function(err) {
-          if (err) {
-            console.error('Error creating user:', err);
-            return res.status(500).json({
-              success: false,
-              message: 'Error creating user account'
-            });
-          }
+        const userResult = await client.query(`
+          INSERT INTO users (email, password, first_name, last_name, organization, registration_reason, status)
+          VALUES ($1, $2, $3, $4, $5, $6, 'pending')
+          RETURNING id
+        `, [email, passwordHash, first_name, last_name, organization, registration_reason]);
+        
+        const userId = userResult.rows[0].id;
 
-          const userId = this.lastID;
+        // Create registration request record
+        await client.query(`
+          INSERT INTO registration_requests (user_id, status)
+          VALUES ($1, 'pending')
+        `, [userId]);
 
-          // Create registration request record
-          db.run(`
-            INSERT INTO registration_requests (user_id, status)
-            VALUES (?, 'pending')
-          `, [userId], async (err) => {
-            if (err) {
-              console.error('Error creating registration request:', err);
-            }
+        client.release();
 
-            // Send email notification to admin
-            try {
-              await emailService.sendRegistrationNotification({
-                email, first_name, last_name, organization, registration_reason
-              });
-            } catch (emailError) {
-              console.error('Email notification failed:', emailError);
-              // Don't fail registration if email fails
-            }
-
-            res.status(201).json({
-              success: true,
-              message: 'Registration successful! Your account is pending approval. You will receive an email notification once approved.'
-            });
+        // Send email notification to admin
+        try {
+          await emailService.sendRegistrationNotification({
+            email, first_name, last_name, organization, registration_reason
           });
+        } catch (emailError) {
+          console.error('Email notification failed:', emailError);
+          // Don't fail registration if email fails
+        }
+
+        res.status(201).json({
+          success: true,
+          message: 'Registration successful! Your account is pending approval. You will receive an email notification once approved.'
         });
-      } catch (hashError) {
-        console.error('Password hashing error:', hashError);
+      } catch (err) {
+        client.release();
+        console.error('Database error during registration:', err);
         res.status(500).json({
           success: false,
-          message: 'Error processing registration'
+          message: 'Database error'
         });
       }
-    });
+    } else {
+      // SQLite version
+      db.get('SELECT email FROM users WHERE email = ?', [email], async (err, existingUser) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({
+            success: false,
+            message: 'Database error'
+          });
+        }
+
+        if (existingUser) {
+          return res.status(400).json({
+            success: false,
+            message: 'User with this email already exists'
+          });
+        }
+
+        try {
+          // Hash password
+          const passwordHash = await bcrypt.hash(password, 12);
+
+          // Insert new user
+          db.run(`
+            INSERT INTO users (email, password_hash, first_name, last_name, organization, registration_reason, status)
+            VALUES (?, ?, ?, ?, ?, ?, 'pending')
+          `, [email, passwordHash, first_name, last_name, organization, registration_reason], function(err) {
+            if (err) {
+              console.error('Error creating user:', err);
+              return res.status(500).json({
+                success: false,
+                message: 'Error creating user account'
+              });
+            }
+
+            const userId = this.lastID;
+
+            // Create registration request record
+            db.run(`
+              INSERT INTO registration_requests (user_id, status)
+              VALUES (?, 'pending')
+            `, [userId], async (err) => {
+              if (err) {
+                console.error('Error creating registration request:', err);
+              }
+
+              // Send email notification to admin
+              try {
+                await emailService.sendRegistrationNotification({
+                  email, first_name, last_name, organization, registration_reason
+                });
+              } catch (emailError) {
+                console.error('Email notification failed:', emailError);
+                // Don't fail registration if email fails
+              }
+
+              res.status(201).json({
+                success: true,
+                message: 'Registration successful! Your account is pending approval. You will receive an email notification once approved.'
+              });
+            });
+          });
+        } catch (hashError) {
+          console.error('Password hashing error:', hashError);
+          res.status(500).json({
+            success: false,
+            message: 'Error processing registration'
+          });
+        }
+      });
+    }
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({

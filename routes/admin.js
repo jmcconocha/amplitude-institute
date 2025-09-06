@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDatabase } = require('../database/adapter');
+const { getDatabase, dbType } = require('../database/adapter');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const emailService = require('../services/email');
 
@@ -9,73 +9,135 @@ router.use(requireAuth);
 router.use(requireAdmin);
 
 // Get all users with pagination
-router.get('/users', (req, res) => {
-  const db = getDatabase();
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 20;
-  const offset = (page - 1) * limit;
-  const status = req.query.status || '';
-  const search = req.query.search || '';
+router.get('/users', async (req, res) => {
+  try {
+    const db = getDatabase();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+    const status = req.query.status || '';
+    const search = req.query.search || '';
 
-  let whereClause = 'WHERE 1=1';
-  let queryParams = [];
+    let whereClause = 'WHERE 1=1';
+    let queryParams = [];
 
-  if (status) {
-    whereClause += ' AND status = ?';
-    queryParams.push(status);
-  }
-
-  if (search) {
-    whereClause += ' AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR organization LIKE ?)';
-    const searchTerm = `%${search}%`;
-    queryParams.push(searchTerm, searchTerm, searchTerm, searchTerm);
-  }
-
-  // Get total count
-  db.get(`SELECT COUNT(*) as count FROM users ${whereClause}`, queryParams, (err, countResult) => {
-    if (err) {
-      console.error('Error counting users:', err);
-      return res.status(500).json({
-        success: false,
-        message: 'Database error'
-      });
-    }
-
-    // Get users with pagination
-    const selectQuery = `
-      SELECT 
-        id, email, first_name, last_name, organization, role, status,
-        registration_reason, created_at, approved_at, last_login,
-        (SELECT first_name || ' ' || last_name FROM users u2 WHERE u2.id = users.approved_by) as approved_by_name
-      FROM users 
-      ${whereClause}
-      ORDER BY created_at DESC 
-      LIMIT ? OFFSET ?
-    `;
-
-    db.all(selectQuery, [...queryParams, limit, offset], (err, users) => {
-      if (err) {
-        console.error('Error fetching users:', err);
-        return res.status(500).json({
-          success: false,
-          message: 'Database error'
-        });
+    if (dbType === 'postgresql') {
+      // PostgreSQL version
+      let paramIndex = 1;
+      
+      if (status) {
+        whereClause += ` AND status = $${paramIndex++}`;
+        queryParams.push(status);
       }
 
-      res.json({
-        success: true,
-        data: {
-          users,
-          pagination: {
-            page,
-            limit,
-            total: countResult.count,
-            pages: Math.ceil(countResult.count / limit)
+      if (search) {
+        whereClause += ` AND (first_name ILIKE $${paramIndex++} OR last_name ILIKE $${paramIndex++} OR email ILIKE $${paramIndex++} OR organization ILIKE $${paramIndex++})`;
+        const searchTerm = `%${search}%`;
+        queryParams.push(searchTerm, searchTerm, searchTerm, searchTerm);
+      }
+
+      const client = await db.connect();
+      
+      try {
+        // Get total count
+        const countResult = await client.query(`SELECT COUNT(*) as count FROM users ${whereClause}`, queryParams);
+        const totalCount = parseInt(countResult.rows[0].count);
+
+        // Get users with pagination
+        const selectQuery = `
+          SELECT 
+            id, email, first_name, last_name, organization, role, status,
+            registration_reason, created_at, approved_at, last_login,
+            (SELECT first_name || ' ' || last_name FROM users u2 WHERE u2.id = users.approved_by) as approved_by_name
+          FROM users 
+          ${whereClause}
+          ORDER BY created_at DESC 
+          LIMIT $${paramIndex++} OFFSET $${paramIndex++}
+        `;
+        
+        const usersResult = await client.query(selectQuery, [...queryParams, limit, offset]);
+        
+        res.json({
+          success: true,
+          data: {
+            users: usersResult.rows,
+            pagination: {
+              page,
+              limit,
+              total: totalCount,
+              pages: Math.ceil(totalCount / limit)
+            }
           }
+        });
+      } finally {
+        client.release();
+      }
+    } else {
+      // SQLite version
+      if (status) {
+        whereClause += ' AND status = ?';
+        queryParams.push(status);
+      }
+
+      if (search) {
+        whereClause += ' AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR organization LIKE ?)';
+        const searchTerm = `%${search}%`;
+        queryParams.push(searchTerm, searchTerm, searchTerm, searchTerm);
+      }
+
+      // Get total count
+      db.get(`SELECT COUNT(*) as count FROM users ${whereClause}`, queryParams, (err, countResult) => {
+        if (err) {
+          console.error('Error counting users:', err);
+          return res.status(500).json({
+            success: false,
+            message: 'Database error'
+          });
         }
+
+        // Get users with pagination
+        const selectQuery = `
+          SELECT 
+            id, email, first_name, last_name, organization, role, status,
+            registration_reason, created_at, approved_at, last_login,
+            (SELECT first_name || ' ' || last_name FROM users u2 WHERE u2.id = users.approved_by) as approved_by_name
+          FROM users 
+          ${whereClause}
+          ORDER BY created_at DESC 
+          LIMIT ? OFFSET ?
+        `;
+
+        db.all(selectQuery, [...queryParams, limit, offset], (err, users) => {
+          if (err) {
+            console.error('Error fetching users:', err);
+            return res.status(500).json({
+              success: false,
+              message: 'Database error'
+            });
+          }
+
+          res.json({
+            success: true,
+            data: {
+              users,
+              pagination: {
+                page,
+                limit,
+                total: countResult.count,
+                pages: Math.ceil(countResult.count / limit)
+              }
+            }
+          });
+        });
       });
+    }
+  } catch (error) {
+    console.error('Error in /users route:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Database error'
     });
-  });
+  }
 });
 
 // Get pending registration requests

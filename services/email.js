@@ -2,44 +2,38 @@ const nodemailer = require('nodemailer');
 
 class EmailService {
   constructor() {
-    // Check if SMTP is configured
-    this.isConfigured = !!(
-      process.env.SMTP_HOST && 
-      process.env.SMTP_PORT && 
-      process.env.SMTP_USER && 
-      process.env.SMTP_PASS
-    );
-    
-    if (this.isConfigured) {
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-    } else {
-      console.log('⚠️  SMTP not configured - emails will be logged instead of sent');
-      this.transporter = null;
-    }
+    console.log('📧 Initializing email service with:', {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}***` : 'not set',
+      pass: process.env.SMTP_PASS ? 'set' : 'not set'
+    });
+
+    this.transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT),
+      secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    // Verify connection on startup
+    this.transporter.verify((error, success) => {
+      if (error) {
+        console.error('❌ SMTP connection verification failed:', error);
+      } else {
+        console.log('✅ SMTP server is ready to send emails');
+      }
+    });
   }
 
   async sendRegistrationNotification(userDetails) {
-    if (!this.isConfigured) {
-      console.log('📧 [SMTP NOT CONFIGURED] Would send registration notification:', {
-        to: process.env.ADMIN_EMAIL || 'admin@example.com',
-        user: `${userDetails.first_name} ${userDetails.last_name} (${userDetails.email})`,
-        organization: userDetails.organization
-      });
-      return { success: true, messageId: 'smtp-not-configured' };
-    }
-
     const { email, first_name, last_name, organization, registration_reason } = userDetails;
     
     const mailOptions = {
-      from: process.env.SMTP_USER,
+      from: `"The Amplitude Institute" <${process.env.SMTP_USER}>`,
       to: process.env.ADMIN_EMAIL,
       subject: '🔐 New User Registration Request - The Amplitude Institute',
       html: `
@@ -90,26 +84,29 @@ class EmailService {
     };
 
     try {
+      console.log('📧 Sending registration notification with options:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
+      });
+      
       const info = await this.transporter.sendMail(mailOptions);
       console.log('📧 Registration notification sent:', info.messageId);
       return { success: true, messageId: info.messageId };
     } catch (error) {
       console.error('❌ Failed to send registration notification:', error);
+      console.error('❌ Mail options were:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
+      });
       return { success: false, error: error.message };
     }
   }
 
   async sendApprovalNotification(userEmail, userName) {
-    if (!this.isConfigured) {
-      console.log('📧 [SMTP NOT CONFIGURED] Would send approval notification:', {
-        to: userEmail,
-        user: userName
-      });
-      return { success: true, messageId: 'smtp-not-configured' };
-    }
-
     const mailOptions = {
-      from: process.env.SMTP_USER,
+      from: `"The Amplitude Institute" <${process.env.SMTP_USER}>`,
       to: userEmail,
       subject: '✅ Registration Approved - The Amplitude Institute',
       html: `
@@ -171,17 +168,8 @@ class EmailService {
   }
 
   async sendDenialNotification(userEmail, userName, reason = '') {
-    if (!this.isConfigured) {
-      console.log('📧 [SMTP NOT CONFIGURED] Would send denial notification:', {
-        to: userEmail,
-        user: userName,
-        reason: reason
-      });
-      return { success: true, messageId: 'smtp-not-configured' };
-    }
-
     const mailOptions = {
-      from: process.env.SMTP_USER,
+      from: `"The Amplitude Institute" <${process.env.SMTP_USER}>`,
       to: userEmail,
       subject: '❌ Registration Request Update - The Amplitude Institute',
       html: `

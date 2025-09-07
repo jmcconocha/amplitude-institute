@@ -76,9 +76,27 @@ app.get('/admin*', authMiddleware.requireAuth, authMiddleware.requireAdmin, (req
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Protected static files and fallback
-app.use(authMiddleware.requireAuth);
-app.use(express.static(path.join(__dirname, 'public')));
+// Static assets (CSS, JS, images) - no authentication required
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, path) => {
+    // Set proper MIME types for static assets
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+  }
+}));
+
+// Protected fallback for HTML pages only
+app.use((req, res, next) => {
+  // Only apply auth middleware to HTML requests, not static assets
+  if (req.path.endsWith('.css') || req.path.endsWith('.js') || req.path.endsWith('.png') || req.path.endsWith('.jpg') || req.path.endsWith('.ico')) {
+    return next();
+  }
+  return authMiddleware.requireAuth(req, res, next);
+});
 
 // Fallback for protected routes
 app.get('*', (req, res) => {

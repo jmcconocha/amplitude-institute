@@ -158,11 +158,22 @@ class EmailService {
     };
 
     try {
+      console.log('📧 Sending approval notification with options:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
+      });
+      
       const info = await this.transporter.sendMail(mailOptions);
       console.log('📧 Approval notification sent:', info.messageId);
       return { success: true, messageId: info.messageId };
     } catch (error) {
       console.error('❌ Failed to send approval notification:', error);
+      console.error('❌ Mail options were:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
+      });
       return { success: false, error: error.message };
     }
   }
@@ -211,11 +222,22 @@ class EmailService {
     };
 
     try {
+      console.log('📧 Sending denial notification with options:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
+      });
+      
       const info = await this.transporter.sendMail(mailOptions);
       console.log('📧 Denial notification sent:', info.messageId);
       return { success: true, messageId: info.messageId };
     } catch (error) {
       console.error('❌ Failed to send denial notification:', error);
+      console.error('❌ Mail options were:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
+      });
       return { success: false, error: error.message };
     }
   }

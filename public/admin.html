@@ -291,7 +291,7 @@
             <p class="welcome-text">Welcome, <span id="adminEmail"></span></p>
             <div>
                 <a href="/" class="back-to-site">Back to Site</a>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
             </div>
         </div>
         
@@ -349,7 +349,48 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkAdminAuth();
             loadUsers();
+            setupEventListeners();
         });
+        
+        function setupEventListeners() {
+            // Logout button
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logout);
+            }
+            
+            // Delegate admin action buttons using event delegation
+            document.addEventListener('click', function(event) {
+                const button = event.target.closest('[data-action]');
+                if (!button) return;
+                
+                const userId = parseInt(button.getAttribute('data-user-id'));
+                const action = button.getAttribute('data-action');
+                
+                console.log(`🎯 Admin action clicked: ${action} for user ${userId}`);
+                
+                switch(action) {
+                    case 'approve':
+                        approveUser(userId);
+                        break;
+                    case 'deny':
+                        denyUser(userId);
+                        break;
+                    case 'block':
+                        blockUser(userId);
+                        break;
+                    case 'unblock':
+                        unblockUser(userId);
+                        break;
+                    case 'delete':
+                        console.log('🗑️ Delete action triggered for user:', userId);
+                        removeUser(userId);
+                        break;
+                    default:
+                        console.warn('Unknown action:', action);
+                }
+            });
+        }
         
         async function checkAdminAuth() {
             try {
@@ -462,10 +503,10 @@
                                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="btn-approve" onclick="approveUser(${user.id})">
+                                        <button class="btn-approve" data-user-id="${user.id}" data-action="approve">
                                             <i class="fas fa-check"></i> Approve
                                         </button>
-                                        <button class="btn-deny" onclick="denyUser(${user.id})">
+                                        <button class="btn-deny" data-user-id="${user.id}" data-action="deny">
                                             <i class="fas fa-times"></i> Deny
                                         </button>
                                     </div>
@@ -519,23 +560,23 @@
                                 <td>
                                     <div class="action-buttons">
                                         ${user.status === 'pending' ? `
-                                            <button class="btn-approve" onclick="approveUser(${user.id})">
+                                            <button class="btn-approve" data-user-id="${user.id}" data-action="approve">
                                                 <i class="fas fa-check"></i>
                                             </button>
-                                            <button class="btn-deny" onclick="denyUser(${user.id})">
+                                            <button class="btn-deny" data-user-id="${user.id}" data-action="deny">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         ` : user.status === 'approved' ? `
-                                            <button class="btn-deny" onclick="blockUser(${user.id})">
+                                            <button class="btn-deny" data-user-id="${user.id}" data-action="block">
                                                 <i class="fas fa-ban"></i> Block
                                             </button>
                                         ` : user.status === 'blocked' ? `
-                                            <button class="btn-approve" onclick="unblockUser(${user.id})">
+                                            <button class="btn-approve" data-user-id="${user.id}" data-action="unblock">
                                                 <i class="fas fa-undo"></i> Unblock
                                             </button>
                                         ` : ''}
                                         ${user.role !== 'admin' ? `
-                                            <button class="btn-remove" onclick="console.log('Delete button clicked for user ${user.id}'); removeUser(${user.id})" title="Delete user permanently">
+                                            <button class="btn-remove" data-user-id="${user.id}" data-action="delete" title="Delete user permanently">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         ` : ''}

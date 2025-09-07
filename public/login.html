@@ -293,7 +293,7 @@
             
             // Check if already logged in and handle redirects
             const urlParams = new URLSearchParams(window.location.search);
-            const redirectTo = urlParams.get('redirect') || '/';
+            const redirectTo = urlParams.get('redirect') || '/dashboard';
             
             fetch('/api/auth/me', { credentials: 'include' })
                 .then(response => response.json())

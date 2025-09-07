@@ -78,6 +78,9 @@ app.get('/register', (req, res) => {
 });
 
 // Protected routes (must come before static middleware)
+app.get('/dashboard*', authMiddleware.requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
 app.get('/profile*', authMiddleware.requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
@@ -103,16 +106,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
   redirect: false
 }));
 
-// Protected fallback for HTML pages only
-app.use((req, res, next) => {
-  // Only apply auth middleware to HTML requests, not static assets
-  if (req.path.endsWith('.css') || req.path.endsWith('.js') || req.path.endsWith('.png') || req.path.endsWith('.jpg') || req.path.endsWith('.ico')) {
-    return next();
-  }
-  return authMiddleware.requireAuth(req, res, next);
-});
-
-// Fallback for protected routes
+// Public marketing website - serve index.html for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

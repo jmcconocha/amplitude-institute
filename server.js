@@ -35,7 +35,11 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? process.env.SITE_URL : 'http://localhost:3000',
+  origin: process.env.NODE_ENV === 'production' ? [
+    'https://www.amplitudeinstitute.com',
+    'https://amplitudeinstitute.com',
+    'https://amplitude-institute1.onrender.com'
+  ] : 'http://localhost:3000',
   credentials: true
 }));
 

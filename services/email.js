@@ -72,7 +72,7 @@ class EmailService {
               <p>Please review this registration request and take appropriate action:</p>
               
               <div style="text-align: center; margin: 20px 0;">
-                <a href="https://amplitude-institute1.onrender.com/admin" class="btn btn-approve">Review in Admin Panel</a>
+                <a href="https://www.amplitudeinstitute.com/admin" class="btn btn-approve">Review in Admin Panel</a>
               </div>
               
               <p><em>You can approve or deny this registration request from the admin panel.</em></p>
@@ -142,7 +142,7 @@ class EmailService {
               </ul>
               
               <div style="text-align: center;">
-                <a href="https://amplitude-institute1.onrender.com/login" class="btn">Login to Your Account</a>
+                <a href="https://www.amplitudeinstitute.com/login" class="btn">Login to Your Account</a>
               </div>
               
               <p>If you have any questions, please don't hesitate to reach out.</p>

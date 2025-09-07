@@ -383,6 +383,65 @@ document.addEventListener('DOMContentLoaded', function() {
     
     preloadImages();
     
+    // Check authentication and show/hide admin menu
+    async function checkAuthAndUpdateUI() {
+        try {
+            const response = await fetch('/api/auth/me', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.authenticated) {
+                // User is authenticated - show logout button
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.style.display = 'block';
+                }
+                
+                // Show/hide admin menu based on role
+                const adminLink = document.querySelector('a[href="/admin"]');
+                if (adminLink) {
+                    const adminListItem = adminLink.parentElement;
+                    if (data.user && data.user.role === 'admin') {
+                        adminListItem.style.display = 'block';
+                    } else {
+                        adminListItem.style.display = 'none';
+                    }
+                }
+            } else {
+                // User is not authenticated - hide both logout and admin
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.style.display = 'none';
+                }
+                
+                const adminLink = document.querySelector('a[href="/admin"]');
+                if (adminLink) {
+                    const adminListItem = adminLink.parentElement;
+                    adminListItem.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Auth check error:', error);
+            // On error, hide admin menu and logout button for safety
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.style.display = 'none';
+            }
+            
+            const adminLink = document.querySelector('a[href="/admin"]');
+            if (adminLink) {
+                const adminListItem = adminLink.parentElement;
+                adminListItem.style.display = 'none';
+            }
+        }
+    }
+    
+    // Call auth check on page load
+    checkAuthAndUpdateUI();
+
     // Logout functionality
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {

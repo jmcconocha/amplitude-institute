@@ -282,6 +282,56 @@
         .back-to-site:hover {
             background: #5a67d8;
         }
+        
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .role-admin {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+        
+        .role-user {
+            background: #e0e7ff;
+            color: #3730a3;
+            border: 1px solid #6366f1;
+        }
+        
+        .btn-grant-admin {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin: 2px;
+        }
+        
+        .btn-grant-admin:hover {
+            background: #d97706;
+        }
+        
+        .btn-revoke-admin {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin: 2px;
+        }
+        
+        .btn-revoke-admin:hover {
+            background: #b91c1c;
+        }
     </style>
 </head>
 <body>
@@ -345,6 +395,7 @@
 
     <script>
         let users = [];
+        let currentUserId = null;
         
         document.addEventListener('DOMContentLoaded', function() {
             checkAdminAuth();
@@ -386,6 +437,14 @@
                         console.log('🗑️ Delete action triggered for user:', userId);
                         removeUser(userId);
                         break;
+                    case 'grant-admin':
+                        console.log('👑 Grant admin action triggered for user:', userId);
+                        grantAdmin(userId);
+                        break;
+                    case 'revoke-admin':
+                        console.log('🔻 Revoke admin action triggered for user:', userId);
+                        revokeAdmin(userId);
+                        break;
                     default:
                         console.warn('Unknown action:', action);
                 }
@@ -402,6 +461,7 @@
                     return;
                 }
                 
+                currentUserId = data.user.id;
                 document.getElementById('adminEmail').textContent = data.user.email;
             } catch (error) {
                 console.error('Auth check failed:', error);
@@ -540,6 +600,7 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Organization</th>
+                            <th>Role</th>
                             <th>Status</th>
                             <th>Date</th>
                             <th>Actions</th>
@@ -551,6 +612,11 @@
                                 <td>${user.first_name} ${user.last_name}</td>
                                 <td>${user.email}</td>
                                 <td>${user.organization || 'N/A'}</td>
+                                <td>
+                                    <span class="role-badge role-${user.role || 'user'}">
+                                        ${user.role === 'admin' ? '👑 Admin' : '👤 User'}
+                                    </span>
+                                </td>
                                 <td>
                                     <span class="status-badge status-${user.status}">
                                         ${user.status.charAt(0).toUpperCase() + user.status.slice(1)}
@@ -575,6 +641,17 @@
                                                 <i class="fas fa-undo"></i> Unblock
                                             </button>
                                         ` : ''}
+                                        ${user.role === 'admin' ? `
+                                            ${user.id !== 1 && user.id !== currentUserId ? `
+                                                <button class="btn-revoke-admin" data-user-id="${user.id}" data-action="revoke-admin" title="Revoke admin privileges">
+                                                    <i class="fas fa-user-times"></i> Revoke Admin
+                                                </button>
+                                            ` : ''}
+                                        ` : `
+                                            <button class="btn-grant-admin" data-user-id="${user.id}" data-action="grant-admin" title="Grant admin privileges">
+                                                <i class="fas fa-user-shield"></i> Make Admin
+                                            </button>
+                                        `}
                                         ${user.role !== 'admin' ? `
                                             <button class="btn-remove" data-user-id="${user.id}" data-action="delete" title="Delete user permanently">
                                                 <i class="fas fa-trash"></i>
@@ -738,6 +815,62 @@
                 }
             } catch (error) {
                 console.error('Failed to remove user:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        async function grantAdmin(userId) {
+            console.log('👑 Grant admin function called with ID:', userId);
+            
+            if (!confirm('Grant admin privileges to this user? They will have full access to the admin panel.')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/grant-admin`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Admin privileges granted successfully', 'success');
+                    loadUsers();
+                } else {
+                    showNotification(data.message || 'Failed to grant admin privileges', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to grant admin:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        async function revokeAdmin(userId) {
+            console.log('🔻 Revoke admin function called with ID:', userId);
+            
+            if (!confirm('Revoke admin privileges from this user? They will lose access to the admin panel.')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/revoke-admin`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Admin privileges revoked successfully', 'success');
+                    loadUsers();
+                } else {
+                    showNotification(data.message || 'Failed to revoke admin privileges', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to revoke admin:', error);
                 showNotification('Network error', 'error');
             }
         }

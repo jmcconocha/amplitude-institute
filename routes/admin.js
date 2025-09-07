@@ -738,4 +738,210 @@ router.delete('/users/:id', async (req, res) => {
   }
 });
 
+// Grant admin privileges
+router.post('/users/:id/grant-admin', async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const db = getDatabase();
+
+  if (dbType === 'postgresql') {
+    // PostgreSQL version
+    const client = await db.connect();
+
+    try {
+      // Check if user exists
+      const userResult = await client.query('SELECT id, email, first_name, last_name, role FROM users WHERE id = $1', [userId]);
+      
+      if (userResult.rows.length === 0) {
+        client.release();
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      const user = userResult.rows[0];
+      
+      if (user.role === 'admin') {
+        client.release();
+        return res.status(400).json({
+          success: false,
+          message: 'User is already an admin'
+        });
+      }
+
+      // Update user role to admin
+      await client.query('UPDATE users SET role = $1 WHERE id = $2', ['admin', userId]);
+      client.release();
+
+      console.log(`👑 Admin privileges granted to user: ${user.email} by admin: ${req.user.email}`);
+
+      res.json({
+        success: true,
+        message: `Admin privileges granted to ${user.first_name} ${user.last_name}`
+      });
+    } catch (err) {
+      client.release();
+      console.error('Database error granting admin:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Database error'
+      });
+    }
+  } else {
+    // SQLite version
+    db.get('SELECT id, email, first_name, last_name, role FROM users WHERE id = ?', [userId], (err, user) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Database error'
+        });
+      }
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      if (user.role === 'admin') {
+        return res.status(400).json({
+          success: false,
+          message: 'User is already an admin'
+        });
+      }
+
+      // Update user role to admin
+      db.run('UPDATE users SET role = ? WHERE id = ?', ['admin', userId], function(err) {
+        if (err) {
+          console.error('Error granting admin privileges:', err);
+          return res.status(500).json({
+            success: false,
+            message: 'Error granting admin privileges'
+          });
+        }
+
+        console.log(`👑 Admin privileges granted to user: ${user.email} by admin: ${req.user.email}`);
+
+        res.json({
+          success: true,
+          message: `Admin privileges granted to ${user.first_name} ${user.last_name}`
+        });
+      });
+    });
+  }
+});
+
+// Revoke admin privileges
+router.post('/users/:id/revoke-admin', async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const db = getDatabase();
+
+  // Prevent revoking admin from the primary admin account (assuming it's ID 1)
+  if (userId === 1) {
+    return res.status(403).json({
+      success: false,
+      message: 'Cannot revoke admin privileges from the primary admin account'
+    });
+  }
+
+  // Prevent admins from revoking their own privileges
+  if (userId === req.user.id) {
+    return res.status(403).json({
+      success: false,
+      message: 'You cannot revoke your own admin privileges'
+    });
+  }
+
+  if (dbType === 'postgresql') {
+    // PostgreSQL version
+    const client = await db.connect();
+
+    try {
+      // Check if user exists
+      const userResult = await client.query('SELECT id, email, first_name, last_name, role FROM users WHERE id = $1', [userId]);
+      
+      if (userResult.rows.length === 0) {
+        client.release();
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      const user = userResult.rows[0];
+      
+      if (user.role !== 'admin') {
+        client.release();
+        return res.status(400).json({
+          success: false,
+          message: 'User is not an admin'
+        });
+      }
+
+      // Update user role to user
+      await client.query('UPDATE users SET role = $1 WHERE id = $2', ['user', userId]);
+      client.release();
+
+      console.log(`🔻 Admin privileges revoked from user: ${user.email} by admin: ${req.user.email}`);
+
+      res.json({
+        success: true,
+        message: `Admin privileges revoked from ${user.first_name} ${user.last_name}`
+      });
+    } catch (err) {
+      client.release();
+      console.error('Database error revoking admin:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Database error'
+      });
+    }
+  } else {
+    // SQLite version
+    db.get('SELECT id, email, first_name, last_name, role FROM users WHERE id = ?', [userId], (err, user) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Database error'
+        });
+      }
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      if (user.role !== 'admin') {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not an admin'
+        });
+      }
+
+      // Update user role to user
+      db.run('UPDATE users SET role = ? WHERE id = ?', ['user', userId], function(err) {
+        if (err) {
+          console.error('Error revoking admin privileges:', err);
+          return res.status(500).json({
+            success: false,
+            message: 'Error revoking admin privileges'
+          });
+        }
+
+        console.log(`🔻 Admin privileges revoked from user: ${user.email} by admin: ${req.user.email}`);
+
+        res.json({
+          success: true,
+          message: `Admin privileges revoked from ${user.first_name} ${user.last_name}`
+        });
+      });
+    });
+  }
+});
+
 module.exports = router;

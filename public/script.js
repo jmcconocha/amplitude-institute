@@ -406,6 +406,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     profileLink.parentElement.style.display = 'block';
                 }
 
+                // Update Home link behavior based on current page context
+                const currentPath = window.location.pathname;
+                const homeLinks = document.querySelectorAll('a[href="/"], a[href="#home"]');
+                homeLinks.forEach(link => {
+                    const linkText = link.textContent.trim().toLowerCase();
+                    if (linkText === 'home') {
+                        // If user is on profile, admin, or other pages (not dashboard), Home should go to dashboard
+                        if (currentPath === '/profile' || currentPath === '/admin' || 
+                            (currentPath !== '/dashboard' && currentPath !== '/' && !currentPath.includes('/dashboard'))) {
+                            link.setAttribute('href', '/dashboard');
+                        }
+                        // If on dashboard or landing page, keep existing behavior (section navigation or landing)
+                        // The landing page case is handled by the else block below
+                    }
+                });
+
                 // Show/hide admin menu based on role
                 const adminLink = document.querySelector('a[href="/admin"]');
                 if (adminLink) {
@@ -428,6 +444,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     profileLink.parentElement.style.display = 'none';
                 }
                 
+                // Ensure Home links point to landing page for unauthenticated users
+                const homeLinks = document.querySelectorAll('a[href="/dashboard"]');
+                homeLinks.forEach(link => {
+                    // Check if this is meant to be a Home link by checking text content or class
+                    const linkText = link.textContent.trim().toLowerCase();
+                    if (linkText === 'home' || link.classList.contains('home-link') || 
+                        link.getAttribute('href') === '/dashboard') {
+                        link.setAttribute('href', '/');
+                    }
+                });
+                
                 const adminLink = document.querySelector('a[href="/admin"]');
                 if (adminLink) {
                     const adminListItem = adminLink.parentElement;
@@ -446,6 +473,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (profileLink) {
                 profileLink.parentElement.style.display = 'none';
             }
+            
+            // Reset Home links to landing page on auth error
+            const homeLinks = document.querySelectorAll('a[href="/dashboard"]');
+            homeLinks.forEach(link => {
+                const linkText = link.textContent.trim().toLowerCase();
+                if (linkText === 'home' || link.classList.contains('home-link')) {
+                    link.setAttribute('href', '/');
+                }
+            });
             
             const adminLink = document.querySelector('a[href="/admin"]');
             if (adminLink) {
@@ -477,9 +513,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (result.success) {
                     showNotification('Logged out successfully', 'success');
-                    // Redirect to login page after a short delay
+                    // Redirect to landing page after a short delay
                     setTimeout(() => {
-                        window.location.href = '/login';
+                        window.location.href = '/';
                     }, 1000);
                 } else {
                     showNotification('Logout failed: ' + result.message, 'error');

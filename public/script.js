@@ -400,6 +400,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     logoutBtn.style.display = 'block';
                 }
                 
+                // Show profile link for authenticated users
+                const profileLink = document.getElementById('profileLink');
+                if (profileLink) {
+                    profileLink.parentElement.style.display = 'block';
+                }
+
                 // Show/hide admin menu based on role
                 const adminLink = document.querySelector('a[href="/admin"]');
                 if (adminLink) {
@@ -411,10 +417,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } else {
-                // User is not authenticated - hide both logout and admin
+                // User is not authenticated - hide logout, profile, and admin
                 const logoutBtn = document.getElementById('logout-btn');
                 if (logoutBtn) {
                     logoutBtn.style.display = 'none';
+                }
+                
+                const profileLink = document.getElementById('profileLink');
+                if (profileLink) {
+                    profileLink.parentElement.style.display = 'none';
                 }
                 
                 const adminLink = document.querySelector('a[href="/admin"]');
@@ -425,10 +436,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Auth check error:', error);
-            // On error, hide admin menu and logout button for safety
+            // On error, hide profile, admin menu, and logout button for safety
             const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
                 logoutBtn.style.display = 'none';
+            }
+            
+            const profileLink = document.getElementById('profileLink');
+            if (profileLink) {
+                profileLink.parentElement.style.display = 'none';
             }
             
             const adminLink = document.querySelector('a[href="/admin"]');

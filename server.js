@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const profileRoutes = require('./routes/profile');
 const authMiddleware = require('./middleware/auth');
 const { initDatabase } = require('./database/adapter');
 
@@ -66,6 +67,7 @@ app.use(cookieParser());
 // API routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/admin', authMiddleware.requireAuth, authMiddleware.requireAdmin, adminRoutes);
+app.use('/api/profile', authMiddleware.requireAuth, profileRoutes);
 
 // Public routes (no authentication required)
 app.get('/login', (req, res) => {
@@ -75,7 +77,10 @@ app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
-// Protected admin routes (must come before static middleware)
+// Protected routes (must come before static middleware)
+app.get('/profile*', authMiddleware.requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'profile.html'));
+});
 app.get('/admin*', authMiddleware.requireAuth, authMiddleware.requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });

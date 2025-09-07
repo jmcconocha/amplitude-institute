@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - The Amplitude Institute</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+
+        .profile-info h1 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+        }
+
+        .profile-info p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .profile-sections {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .profile-section {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .edit-btn {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .profile-field {
+            margin-bottom: 1rem;
+        }
+
+        .field-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .field-value {
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-color-light);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .password-requirements {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .password-requirements ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .password-requirements li {
+            margin-bottom: 0.25rem;
+        }
+
+        .requirement-met {
+            color: var(--success-color);
+        }
+
+        .requirement-unmet {
+            color: var(--error-color);
+        }
+
+        .success-message {
+            background: var(--success-color-light);
+            color: var(--success-color-dark);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .error-message {
+            background: var(--error-color-light);
+            color: var(--error-color-dark);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--error-color);
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-avatar {
+                margin: 0 0 1rem 0;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>🏢 The Amplitude Institute</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/profile" class="nav-link active">Profile</a></li>
+                <li><a href="#" id="adminLink" class="nav-link hidden">Admin</a></li>
+                <li><a href="#" id="logoutBtn" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">
+                    <span id="avatarInitials">U</span>
+                </div>
+                <div class="profile-info">
+                    <h1 id="profileName">Loading...</h1>
+                    <p id="profileEmail">loading@example.com</p>
+                    <p id="profileJoinDate">Member since: Loading...</p>
+                </div>
+            </div>
+
+            <div class="profile-sections">
+                <!-- Personal Information Section -->
+                <div class="profile-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Personal Information</h2>
+                        <button class="edit-btn" data-edit-section="personal">Edit</button>
+                    </div>
+                    
+                    <div id="personalInfo">
+                        <div class="profile-field">
+                            <div class="field-label">First Name</div>
+                            <div class="field-value" id="firstName">Loading...</div>
+                        </div>
+                        <div class="profile-field">
+                            <div class="field-label">Last Name</div>
+                            <div class="field-value" id="lastName">Loading...</div>
+                        </div>
+                        <div class="profile-field">
+                            <div class="field-label">Organization</div>
+                            <div class="field-value" id="organization">Not specified</div>
+                        </div>
+                        <div class="profile-field">
+                            <div class="field-label">Registration Reason</div>
+                            <div class="field-value" id="registrationReason">Not specified</div>
+                        </div>
+                    </div>
+
+                    <form id="personalInfoForm" class="hidden">
+                        <div id="personalFormMessages"></div>
+                        <div class="form-group">
+                            <label for="editFirstName">First Name *</label>
+                            <input type="text" id="editFirstName" name="first_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editLastName">Last Name *</label>
+                            <input type="text" id="editLastName" name="last_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editOrganization">Organization</label>
+                            <input type="text" id="editOrganization" name="organization">
+                        </div>
+                        <div class="form-group">
+                            <label for="editRegistrationReason">Registration Reason</label>
+                            <textarea id="editRegistrationReason" name="registration_reason" placeholder="Why did you join The Amplitude Institute?"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" data-cancel-edit="personal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Security Section -->
+                <div class="profile-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Security</h2>
+                        <button class="edit-btn" data-edit-section="security">Change Password</button>
+                    </div>
+                    
+                    <div id="securityInfo">
+                        <div class="profile-field">
+                            <div class="field-label">Password</div>
+                            <div class="field-value">••••••••••</div>
+                        </div>
+                        <div class="profile-field">
+                            <div class="field-label">Email Address</div>
+                            <div class="field-value" id="emailAddress">loading@example.com</div>
+                            <small style="color: var(--text-secondary); font-size: 0.8rem;">Email cannot be changed - contact support if needed</small>
+                        </div>
+                    </div>
+
+                    <form id="passwordForm" class="hidden">
+                        <div id="passwordFormMessages"></div>
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password *</label>
+                            <input type="password" id="currentPassword" name="current_password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password *</label>
+                            <input type="password" id="newPassword" name="new_password" required>
+                            <div class="password-requirements">
+                                <strong>Password must contain:</strong>
+                                <ul id="passwordRequirements">
+                                    <li class="requirement-unmet" data-requirement="length">At least 8 characters</li>
+                                    <li class="requirement-unmet" data-requirement="uppercase">One uppercase letter</li>
+                                    <li class="requirement-unmet" data-requirement="lowercase">One lowercase letter</li>
+                                    <li class="requirement-unmet" data-requirement="number">One number</li>
+                                    <li class="requirement-unmet" data-requirement="special">One special character</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password *</label>
+                            <input type="password" id="confirmPassword" name="confirm_password" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-danger">Change Password</button>
+                            <button type="button" class="btn btn-secondary" data-cancel-edit="security">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/script.js"></script>
+    <script>
+        // Profile-specific JavaScript
+        let currentUser = null;
+
+        // Load user profile data
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUser = data.user;
+                    displayProfile(currentUser);
+                } else {
+                    showError('Failed to load profile: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('Failed to load profile');
+            }
+        }
+
+        // Display profile data
+        function displayProfile(user) {
+            // Header
+            document.getElementById('profileName').textContent = `${user.first_name} ${user.last_name}`;
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('avatarInitials').textContent = 
+                (user.first_name?.[0] || '') + (user.last_name?.[0] || '');
+
+            const joinDate = new Date(user.created_at);
+            document.getElementById('profileJoinDate').textContent = 
+                `Member since: ${joinDate.toLocaleDateString()}`;
+
+            // Personal info
+            document.getElementById('firstName').textContent = user.first_name || 'Not specified';
+            document.getElementById('lastName').textContent = user.last_name || 'Not specified';
+            document.getElementById('organization').textContent = user.organization || 'Not specified';
+            document.getElementById('registrationReason').textContent = user.registration_reason || 'Not specified';
+            document.getElementById('emailAddress').textContent = user.email;
+
+            // Pre-fill edit forms
+            document.getElementById('editFirstName').value = user.first_name || '';
+            document.getElementById('editLastName').value = user.last_name || '';
+            document.getElementById('editOrganization').value = user.organization || '';
+            document.getElementById('editRegistrationReason').value = user.registration_reason || '';
+        }
+
+        // Edit functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('[data-edit-section]')) {
+                const section = e.target.dataset.editSection;
+                toggleEditMode(section, true);
+            } else if (e.target.matches('[data-cancel-edit]')) {
+                const section = e.target.dataset.cancelEdit;
+                toggleEditMode(section, false);
+            }
+        });
+
+        function toggleEditMode(section, editing) {
+            const infoDiv = document.getElementById(section + 'Info');
+            const formDiv = document.getElementById(section + 'Form') || document.getElementById(section === 'security' ? 'passwordForm' : section + 'InfoForm');
+            const editBtn = document.querySelector(`[data-edit-section="${section}"]`);
+
+            if (editing) {
+                infoDiv.classList.add('hidden');
+                formDiv.classList.remove('hidden');
+                editBtn.textContent = section === 'security' ? 'Cancel' : 'Cancel';
+                editBtn.setAttribute('data-cancel-edit', section);
+                editBtn.removeAttribute('data-edit-section');
+            } else {
+                infoDiv.classList.remove('hidden');
+                formDiv.classList.add('hidden');
+                editBtn.textContent = section === 'security' ? 'Change Password' : 'Edit';
+                editBtn.setAttribute('data-edit-section', section);
+                editBtn.removeAttribute('data-cancel-edit');
+                
+                // Clear password form
+                if (section === 'security') {
+                    document.getElementById('passwordForm').reset();
+                    clearMessages('passwordFormMessages');
+                } else {
+                    clearMessages('personalFormMessages');
+                }
+            }
+        }
+
+        // Handle personal info form submission
+        document.getElementById('personalInfoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                showLoading('personalInfoForm');
+                const response = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess('Profile updated successfully!', 'personalFormMessages');
+                    currentUser = { ...currentUser, ...result.user };
+                    displayProfile(currentUser);
+                    setTimeout(() => toggleEditMode('personal', false), 1000);
+                } else {
+                    showError(result.message, 'personalFormMessages');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showError('Failed to update profile', 'personalFormMessages');
+            } finally {
+                hideLoading('personalInfoForm');
+            }
+        });
+
+        // Handle password form submission
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Validate password match
+            if (data.new_password !== data.confirm_password) {
+                showError('New password and confirmation do not match', 'passwordFormMessages');
+                return;
+            }
+            
+            try {
+                showLoading('passwordForm');
+                const response = await fetch('/api/profile/password', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess('Password updated successfully!', 'passwordFormMessages');
+                    setTimeout(() => toggleEditMode('security', false), 1000);
+                } else {
+                    showError(result.message, 'passwordFormMessages');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showError('Failed to change password', 'passwordFormMessages');
+            } finally {
+                hideLoading('passwordForm');
+            }
+        });
+
+        // Password strength validation
+        document.getElementById('newPassword').addEventListener('input', function(e) {
+            const password = e.target.value;
+            validatePasswordStrength(password);
+        });
+
+        function validatePasswordStrength(password) {
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /\d/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+
+            Object.keys(requirements).forEach(req => {
+                const element = document.querySelector(`[data-requirement="${req}"]`);
+                if (requirements[req]) {
+                    element.classList.remove('requirement-unmet');
+                    element.classList.add('requirement-met');
+                } else {
+                    element.classList.remove('requirement-met');
+                    element.classList.add('requirement-unmet');
+                }
+            });
+        }
+
+        // Utility functions
+        function showSuccess(message, containerId = null) {
+            const container = containerId ? document.getElementById(containerId) : document.body;
+            container.innerHTML = `<div class="success-message">${message}</div>` + (containerId ? container.innerHTML : '');
+        }
+
+        function showError(message, containerId = null) {
+            const container = containerId ? document.getElementById(containerId) : document.body;
+            container.innerHTML = `<div class="error-message">${message}</div>` + (containerId ? container.innerHTML : '');
+        }
+
+        function clearMessages(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+        }
+
+        function showLoading(formId) {
+            document.getElementById(formId).classList.add('loading');
+        }
+
+        function hideLoading(formId) {
+            document.getElementById(formId).classList.remove('loading');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthAndUpdateUI();
+            loadProfile();
+        });
+    </script>
+</body>
+</html>

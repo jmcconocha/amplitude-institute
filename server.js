@@ -80,7 +80,8 @@ app.get('/admin*', authMiddleware.requireAuth, authMiddleware.requireAdmin, (req
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Static assets (CSS, JS, images) - no authentication required
+// Static assets (CSS, JS, images) - no authentication required  
+// CRITICAL: Exclude index.html to prevent auth bypass
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, path) => {
     // Set proper MIME types for static assets
@@ -90,7 +91,11 @@ app.use(express.static(path.join(__dirname, 'public'), {
     if (path.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
     }
-  }
+  },
+  // Exclude HTML files from static serving to force auth middleware
+  index: false,
+  // Additional filter to prevent any HTML file from being served directly
+  redirect: false
 }));
 
 // Protected fallback for HTML pages only

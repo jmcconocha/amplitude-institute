@@ -535,7 +535,7 @@
                                             </button>
                                         ` : ''}
                                         ${user.role !== 'admin' ? `
-                                            <button class="btn-remove" onclick="removeUser(${user.id})" title="Delete user permanently">
+                                            <button class="btn-remove" onclick="console.log('Delete button clicked for user ${user.id}'); removeUser(${user.id})" title="Delete user permanently">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         ` : ''}
@@ -672,7 +672,14 @@
         }
         
         async function removeUser(userId) {
-            if (!confirm('Permanently delete this user? This action cannot be undone.')) return;
+            console.log('🗑️ removeUser function called with ID:', userId);
+            
+            if (!confirm('Permanently delete this user? This action cannot be undone.')) {
+                console.log('❌ User cancelled deletion');
+                return;
+            }
+            
+            console.log('✅ User confirmed deletion, proceeding...');
             
             try {
                 const response = await fetch(`/api/admin/users/${userId}`, {

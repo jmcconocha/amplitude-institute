@@ -33,7 +33,7 @@ class EmailService {
     const { email, first_name, last_name, organization, registration_reason } = userDetails;
     
     const mailOptions = {
-      from: `"The Amplitude Institute" <${process.env.SMTP_USER}>`,
+      from: `"The Amplitude Institute" <noreply@abydosone.ltd>`,
       to: process.env.ADMIN_EMAIL,
       subject: '🔐 New User Registration Request - The Amplitude Institute',
       html: `
@@ -106,7 +106,7 @@ class EmailService {
 
   async sendApprovalNotification(userEmail, userName) {
     const mailOptions = {
-      from: `"The Amplitude Institute" <${process.env.SMTP_USER}>`,
+      from: `"The Amplitude Institute" <noreply@abydosone.ltd>`,
       to: userEmail,
       subject: '✅ Registration Approved - The Amplitude Institute',
       html: `
@@ -169,7 +169,7 @@ class EmailService {
 
   async sendDenialNotification(userEmail, userName, reason = '') {
     const mailOptions = {
-      from: `"The Amplitude Institute" <${process.env.SMTP_USER}>`,
+      from: `"The Amplitude Institute" <noreply@abydosone.ltd>`,
       to: userEmail,
       subject: '❌ Registration Request Update - The Amplitude Institute',
       html: `

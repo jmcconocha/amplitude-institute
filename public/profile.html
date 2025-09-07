@@ -268,7 +268,7 @@
             <ul class="nav-menu">
                 <li><a href="/" class="nav-link">Home</a></li>
                 <li><a href="/profile" class="nav-link active">Profile</a></li>
-                <li><a href="/admin" class="nav-link">Admin</a></li>
+                <li><a href="/admin" class="nav-link" id="adminNavLink" style="display: none;">Admin</a></li>
                 <li><button id="logout-btn" class="nav-link logout-btn">Logout</button></li>
             </ul>
         </div>
@@ -400,21 +400,36 @@
         // Load user profile data
         async function loadProfile() {
             try {
+                console.log('Loading profile data...');
                 const response = await fetch('/api/profile', {
                     method: 'GET',
                     credentials: 'include'
                 });
+                
+                console.log('Profile response status:', response.status);
+                
+                if (!response.ok) {
+                    console.error('Profile API response not OK:', response.status, response.statusText);
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
+                console.log('Profile data received:', data);
 
                 if (data.success) {
                     currentUser = data.user;
                     displayProfile(currentUser);
                 } else {
+                    console.error('Profile API returned error:', data.message);
                     showError('Failed to load profile: ' + data.message);
                 }
             } catch (error) {
                 console.error('Error loading profile:', error);
-                showError('Failed to load profile');
+                showError('Failed to load profile: ' + error.message);
             }
         }
 
@@ -606,10 +621,42 @@
             document.getElementById(formId).classList.remove('loading');
         }
 
+        // Profile-specific auth check
+        async function checkProfileAuth() {
+            try {
+                const response = await fetch('/api/auth/me', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.authenticated && data.user) {
+                        // Show admin link only for admin users
+                        const adminLink = document.getElementById('adminNavLink');
+                        if (adminLink && data.user.role === 'admin') {
+                            adminLink.style.display = 'block';
+                        }
+                        return data.user;
+                    }
+                }
+                
+                // Not authenticated, redirect to login
+                window.location.href = '/login';
+                return null;
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = '/login';
+                return null;
+            }
+        }
+
         // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuthAndUpdateUI();
-            loadProfile();
+        document.addEventListener('DOMContentLoaded', async function() {
+            const user = await checkProfileAuth();
+            if (user) {
+                loadProfile();
+            }
         });
     </script>
 </body>

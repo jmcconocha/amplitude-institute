@@ -30,7 +30,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `research-community.html` - Sprint and program timeline corrections  
 - `partnerships.html` - Partnership value proposition timeline adjustments
 - `public/` directory files - Synchronized public content with realistic timelines
+- `public/index.html` - Removed fabricated statistics and unrealistic success rate claims
+- `public/dashboard.html` - Fixed patent generation claims and clarified metrics as targets
 - Business plan concept note - Strategic timeline alignment
+
+### Specific Marketing Corrections
+- **Fabricated Statistics Removed**: Eliminated unsourced claims like "92% of engineers", "$2.5 trillion lost", "75% success rate"
+- **Language Moderation**: Changed "elite engineers" to "experienced engineers", removed hyperbolic language
+- **Patent Claims Fixed**: Replaced "2-3 patents per sprint" with "patentable concepts development"
+- **Timeline Reality**: Changed "48-hour sprints turn concepts into protected IP" to development-focused language
+- **Metrics Honesty**: Relabeled "Success Metrics" as "Target Metrics" to indicate goals rather than achievements
 
 ## [2.0.0] - 2025-09-05
 

@@ -33,11 +33,11 @@ To become a leading source of original, high-impact technological innovation—b
 
 ### 4. **Core Activities**
 
-- **Innovation Pods**: Small, agile teams working on thematic challenges (e.g. low-power AI, secure firmware, edge orchestration).
-- **Patent Pipeline**: Internal review board to vet ideas, draft filings, and manage IP strategy.
-- **Tech Sprints & Labs**: Time-boxed R&D cycles to prototype and test novel concepts.
+- **Innovation Pods**: Small, agile teams working on thematic challenges over 6-12 month development cycles (e.g. low-power AI, secure firmware, edge orchestration).
+- **IP Development Pipeline**: Internal review board to vet ideas, draft patent applications over 6-18 months, and manage IP strategy.
+- **Tech Sprints & Labs**: Time-boxed R&D cycles to prototype and test novel concepts, leading to patent applications.
 - **Knowledge Publishing**: Release findings via technical papers, blog series, and conference talks.
-- **Advisory & Consulting**: Offer strategic insights to partners and sponsors.
+- **Advisory & Consulting**: Offer strategic insights to partners and sponsors based on validated innovation methodologies.
 
 ---
 

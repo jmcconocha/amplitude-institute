@@ -5,6 +5,33 @@ All notable changes to The Amplitude Institute website will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-09-09
+
+### Changed - Marketing Content Realism
+- **Patent Timeline Claims**: Updated unrealistic "30 days to patent" claims to realistic "6-18 months to patent application"
+- **Development Cycle Timelines**: Changed "30-day cycles" to "6-month development cycles" based on actual product development research
+- **IP Generation Language**: Replaced "generating patents" with "developing patentable concepts" for accuracy
+- **Sprint Outcomes**: Updated claims from "1+ patents per sprint" to "1+ patentable concepts per sprint (with patent applications filed within 6-18 months)"
+- **Mission Timelines**: Restructured mission phases from daily/weekly to monthly phases for realistic execution
+- **Vision Statement**: Modified from "weeks not months" to "months not years" for breakthrough innovations
+
+### Improved - Business Plan Alignment
+- **Concept Document**: Updated core business plan to reflect realistic 6-12 month development cycles
+- **Innovation Pod Cycles**: Changed from unspecified quick cycles to "6-12 month development cycles"
+- **IP Pipeline**: Updated to "draft patent applications over 6-18 months" instead of immediate patent generation
+
+### Fixed - Credibility Issues
+- **Research-Based Timelines**: All timeline claims now based on actual USPTO patent processing times (Track One: 6-12 months, Standard: 1-3 years)
+- **Product Development Reality**: Aligned with industry-standard software (3-12 months) and hardware (1-2+ years) development cycles
+- **Consistent Messaging**: Ensured all marketing pages present consistent, realistic expectations
+
+### Files Modified
+- `index.html` - Main marketing page timeline updates
+- `research-community.html` - Sprint and program timeline corrections  
+- `partnerships.html` - Partnership value proposition timeline adjustments
+- `public/` directory files - Synchronized public content with realistic timelines
+- Business plan concept note - Strategic timeline alignment
+
 ## [2.0.0] - 2025-09-05
 
 ### Added - Complete Authentication System

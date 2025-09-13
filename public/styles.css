@@ -269,10 +269,7 @@ body {
     display: block;
     font-size: 2.5rem;
     font-weight: 700;
-    background: linear-gradient(45deg, #3b82f6, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
     margin-bottom: 0.5rem;
 }
 
@@ -1390,10 +1387,7 @@ body {
 .value-number {
     font-size: 4rem;
     font-weight: 700;
-    background: linear-gradient(45deg, #3b82f6, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
     display: block;
     margin-bottom: 1rem;
 }
@@ -1886,10 +1880,7 @@ body {
 .preview-number {
     font-size: 2.5rem;
     font-weight: 700;
-    background: linear-gradient(45deg, #3b82f6, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
     display: block;
     margin-bottom: 0.5rem;
 }

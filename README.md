@@ -127,6 +127,7 @@ TheAmplitudeInstitute/
 - **Session Management**: Secure login/logout with session persistence
 - **Password Security**: Bcrypt hashing and password complexity requirements
 - **Rate Limiting**: Protection against brute force attacks
+- **Consistent Navigation**: Authentication-aware menu across all pages
 
 ## 🛠️ Development
 

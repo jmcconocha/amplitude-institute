@@ -5,6 +5,26 @@ All notable changes to The Amplitude Institute website will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2025-01-13
+
+### Fixed - Navigation Menu Consistency
+
+#### 🧭 Authentication-Aware Navigation
+- **Menu Consistency**: Fixed Research Community and Partnership pages to show proper logged-in navigation menu
+- **Profile/Admin Access**: Added Profile and Admin links to all pages for authenticated users  
+- **Logout Functionality**: Added logout button to all pages when user is logged in
+- **JavaScript Integration**: Enabled authentication checking on all pages via existing `checkAuthAndUpdateUI()` function
+
+#### Files Modified
+- `public/research-community.html` - Updated navigation structure to match dashboard
+- `public/partnerships.html` - Updated navigation structure to match dashboard
+
+#### Technical Details
+- Both pages now include Profile, Admin (for admins), and Logout options in navigation
+- Menu automatically shows/hides authentication options based on login status
+- Consistent with existing `script.js` authentication handling
+- No backend changes required - leveraged existing authentication system
+
 ## [2.1.0] - 2025-09-09
 
 ### Changed - Marketing Content Realism

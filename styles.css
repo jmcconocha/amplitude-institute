@@ -1271,8 +1271,31 @@ body {
 
 /* Value Proposition Section */
 .value-props {
-    background: var(--gray-50);
-    padding: 6rem 0;
+    padding: 8rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.value-props::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.value-props .section-header {
+    color: white;
+    margin-bottom: 4rem;
+}
+
+.value-props .section-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.2rem;
 }
 
 .section-header.centered {
@@ -1913,4 +1936,347 @@ body {
     .coming-soon-icon {
         font-size: 3rem;
     }
+}
+
+/* ===== ENHANCED VISUAL IMPACT STYLES ===== */
+/* These styles override the existing ones for maximum visual punch */
+
+/* Ultra-Enhanced Value Props Section */
+.value-props {
+    padding: 8rem 0 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.value-props::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.value-props .section-header {
+    color: white !important;
+    margin-bottom: 4rem !important;
+}
+
+.value-props .section-subtitle {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 1.2rem !important;
+}
+
+.value-card {
+    text-align: center !important;
+    padding: 3.5rem 2.5rem !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 2rem !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.value-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+    transform-origin: left;
+}
+
+.value-card:hover::before {
+    transform: scaleX(1);
+}
+
+.value-card:hover {
+    transform: translateY(-20px) scale(1.08) !important;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.25) !important;
+    background: white !important;
+}
+
+.value-number {
+    font-size: 5rem !important;
+    font-weight: 900 !important;
+    display: block !important;
+    margin-bottom: 1.5rem !important;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    line-height: 1 !important;
+    filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.3));
+}
+
+.value-card h3 {
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: var(--text-dark) !important;
+    margin-bottom: 1.5rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+.value-card p {
+    color: var(--text-gray) !important;
+    line-height: 1.7 !important;
+    font-size: 1.1rem !important;
+}
+
+/* Ultra-Enhanced How It Works Section */
+.how-it-works {
+    padding: 8rem 0 !important;
+    background: #f1f5f9 !important;
+    position: relative !important;
+}
+
+.how-it-works::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transform: skewY(-1deg);
+    transform-origin: top left;
+}
+
+.how-it-works .section-header {
+    position: relative !important;
+    z-index: 2 !important;
+    margin-bottom: 4rem !important;
+}
+
+.steps-grid {
+    position: relative !important;
+    z-index: 2 !important;
+    gap: 2.5rem !important;
+}
+
+.step-card {
+    padding: 3rem 2.5rem !important;
+    background: white !important;
+    border-radius: 1.5rem !important;
+    border: 3px solid #e2e8f0 !important;
+    transition: all 0.4s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+    transform-origin: left;
+}
+
+.step-card:hover::before {
+    transform: scaleX(1);
+}
+
+.step-card:hover {
+    border-color: #667eea !important;
+    transform: translateY(-15px) scale(1.03) !important;
+    box-shadow: 0 25px 50px rgba(102, 126, 234, 0.2) !important;
+}
+
+.step-card.featured-step {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    border-color: transparent !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 35px 70px rgba(102, 126, 234, 0.4) !important;
+}
+
+.step-card.featured-step::before {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scaleX(1) !important;
+}
+
+.step-card.featured-step:hover {
+    transform: scale(1.15) translateY(-15px) !important;
+    box-shadow: 0 45px 90px rgba(102, 126, 234, 0.5) !important;
+}
+
+.step-number {
+    width: 4rem !important;
+    height: 4rem !important;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    font-weight: 900 !important;
+    font-size: 1.2rem !important;
+    border-radius: 50% !important;
+    margin-right: 1.5rem !important;
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3) !important;
+}
+
+.featured-step .step-number {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.step-card h3 {
+    font-size: 1.4rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.step-card p {
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.step-highlight {
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 50px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border: 2px solid rgba(102, 126, 234, 0.2) !important;
+}
+
+.featured-step .step-highlight {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* Ultra-Enhanced What We Build Section */
+.what-we-build {
+    padding: 8rem 0 !important;
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.what-we-build::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: #f1f5f9;
+    transform: skewY(-1deg);
+    transform-origin: top left;
+}
+
+.what-we-build .section-header {
+    color: white !important;
+    position: relative !important;
+    z-index: 2 !important;
+    margin-bottom: 4rem !important;
+}
+
+.what-we-build .section-subtitle {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 1.2rem !important;
+}
+
+.build-categories {
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+.category-row {
+    gap: 2.5rem !important;
+    margin-bottom: 2.5rem !important;
+}
+
+.category-card {
+    padding: 3.5rem 2.5rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 1.5rem !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px) !important;
+    transition: all 0.4s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.category-card:hover::before {
+    opacity: 1;
+}
+
+.category-card:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: #667eea !important;
+    transform: translateY(-15px) scale(1.05) !important;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4) !important;
+}
+
+.category-card.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: transparent !important;
+    box-shadow: 0 25px 50px rgba(102, 126, 234, 0.4) !important;
+}
+
+.category-card.primary:hover {
+    transform: translateY(-20px) scale(1.08) !important;
+    box-shadow: 0 40px 80px rgba(102, 126, 234, 0.5) !important;
+}
+
+.category-icon {
+    width: 4.5rem !important;
+    height: 4.5rem !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    margin-bottom: 2rem !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.category-card.primary .category-icon {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.category-icon i {
+    font-size: 2.2rem !important;
+}
+
+.category-content h3 {
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 1.5rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.category-content p {
+    font-size: 1.1rem !important;
+    line-height: 1.7 !important;
 }

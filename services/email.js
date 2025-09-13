@@ -135,7 +135,7 @@ class EmailService {
               <p>You now have access to The Amplitude Institute's platform featuring:</p>
               <ul>
                 <li>🚀 30-day Lean Agile innovation cycles</li>
-                <li>🔬 Weekend innovation sprints (2-day focused sessions)</li>
+                <li>🔬 Innovation sprints (5-day intensive sessions)</li>
                 <li>📊 Success metrics and validated learning</li>
                 <li>🤝 Collaborative research community</li>
                 <li>💡 Patent generation opportunities</li>

@@ -538,3 +538,37 @@ if (typeof window.performance !== 'undefined') {
         }, 0);
     });
 }
+
+// Rotating Hero Headlines
+document.addEventListener('DOMContentLoaded', function() {
+    const headlines = [
+        "Build Innovation-Ready Prototypes",
+        "Turn Ideas Into Working Solutions",
+        "Expert Teams. Breakthrough Results.",
+        "Innovation Sprints That Actually Work",
+        "Solve Complex Challenges Fast",
+        "Get Your Edge Before Competitors Do"
+    ];
+
+    const headlineElement = document.getElementById('rotating-headline');
+
+    if (headlineElement) {
+        // Get the last shown headline to avoid repetition
+        const lastHeadlineIndex = localStorage.getItem('lastHeadline');
+        let availableIndices = [...Array(headlines.length).keys()];
+
+        // Remove the last shown headline from available options (if exists)
+        if (lastHeadlineIndex !== null) {
+            availableIndices = availableIndices.filter(index => index !== parseInt(lastHeadlineIndex));
+        }
+
+        // Select random headline from available options
+        const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        headlineElement.textContent = headlines[randomIndex];
+
+        // Store the selected headline for next time
+        localStorage.setItem('lastHeadline', randomIndex.toString());
+
+        console.log(`Hero headline: "${headlines[randomIndex]}"`);
+    }
+});

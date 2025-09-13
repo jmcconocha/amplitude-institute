@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Content Strategy Alignment
 - **Target Audiences**: Clear messaging for both Engineers (92% have unused ideas) and Companies (traditional R&D costs $250K+)
-- **Value Propositions**: Focus on speed (5 days vs 18+ months), cost savings, and IP protection
+- **Value Propositions**: Focus on speed (as little as 5 days vs 18+ months), cost savings, and IP protection
 - **Launch Messaging**: Consistent Q1 2026 launch date throughout all components
 - **Professional Tone**: Balanced professional authority with accessible innovation messaging
 

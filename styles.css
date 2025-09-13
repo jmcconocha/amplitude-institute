@@ -1264,3 +1264,372 @@ body {
         font-size: 0.9rem;
     }
 }
+
+/* New Marketing Components */
+
+/* Hero Metrics */
+.hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.metric {
+    text-align: center;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.metric-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: var(--light-blue);
+    font-weight: 500;
+}
+
+/* Process Timeline */
+.process-timeline {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.timeline-line {
+    position: absolute;
+    top: 60px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: var(--gradient-primary);
+    z-index: 1;
+}
+
+.process-step {
+    position: relative;
+    text-align: center;
+    z-index: 2;
+}
+
+.step-number {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.step-icon {
+    font-size: 2rem;
+    margin: 2rem 0 1rem 0;
+}
+
+.step-timing {
+    font-size: 0.9rem;
+    color: var(--primary-blue);
+    font-weight: 600;
+    margin: 0.5rem 0;
+}
+
+.step-details {
+    list-style: none;
+    text-align: left;
+    margin-top: 1rem;
+}
+
+.step-details li {
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* Pricing Section */
+.pricing-section {
+    background: var(--gray-50);
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.pricing-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+}
+
+.pricing-card.featured {
+    border: 3px solid var(--primary-blue);
+    position: relative;
+}
+
+.pricing-card.featured::before {
+    content: "Most Popular";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.pricing-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.pricing-icon {
+    font-size: 3rem;
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+}
+
+.price {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin: 1rem 0;
+}
+
+.price-description {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+.pricing-features {
+    list-style: none;
+    margin: 2rem 0;
+}
+
+.pricing-features li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 0.95rem;
+}
+
+.value-comparison {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.value-comparison small {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+/* Coming Soon Section */
+.success {
+    background: var(--gray-50);
+}
+
+.coming-soon {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.coming-soon-icon {
+    font-size: 4rem;
+    color: var(--primary-blue);
+    margin-bottom: 2rem;
+}
+
+.preview-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.preview-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.preview-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+}
+
+.preview-label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* Waitlist Section */
+.waitlist {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.waitlist-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-top: 3rem;
+}
+
+.waitlist-benefits h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.benefits-list {
+    list-style: none;
+}
+
+.benefits-list li {
+    padding: 0.75rem 0;
+    font-size: 1rem;
+}
+
+.waitlist-form {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background: white;
+    color: var(--text-dark);
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.waitlist-count {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.count-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+.count-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Mobile Responsive Updates */
+@media (max-width: 768px) {
+    .hero-metrics {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .process-timeline {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .timeline-line {
+        display: none;
+    }
+
+    .pricing-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .preview-metrics {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .waitlist-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .metric-number,
+    .preview-number {
+        font-size: 2rem;
+    }
+
+    .price {
+        font-size: 2.5rem;
+    }
+
+    .coming-soon-icon {
+        font-size: 3rem;
+    }
+}

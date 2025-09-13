@@ -382,6 +382,152 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     preloadImages();
+
+    // Waitlist Form Functionality
+    const waitlistForm = document.getElementById('waitlist-signup');
+    if (waitlistForm) {
+        waitlistForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById('signup-name').value,
+                email: document.getElementById('signup-email').value,
+                type: document.getElementById('signup-type').value,
+                concept: document.getElementById('signup-concept').value
+            };
+
+            // Basic validation
+            if (!formData.name || !formData.email || !formData.type) {
+                showNotification('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            // Email validation
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(formData.email)) {
+                showNotification('Please enter a valid email address.', 'error');
+                return;
+            }
+
+            // Submit to waitlist (placeholder for now)
+            submitToWaitlist(formData);
+        });
+    }
+
+    // Waitlist submission function
+    function submitToWaitlist(formData) {
+        // Show loading state
+        const submitButton = document.querySelector('.btn-large');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Joining Waitlist...';
+        submitButton.disabled = true;
+
+        // Simulate API call (replace with actual endpoint)
+        setTimeout(() => {
+            // Reset form
+            document.getElementById('waitlist-signup').reset();
+
+            // Show success message
+            showNotification('🎉 Successfully joined the waitlist! You\'ll receive updates about our Q1 2025 launch.', 'success');
+
+            // Update waitlist counter (placeholder)
+            updateWaitlistCounter();
+
+            // Reset button
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        }, 1500);
+    }
+
+    // Update waitlist counter
+    function updateWaitlistCounter() {
+        const counter = document.querySelector('.count-number');
+        if (counter) {
+            const currentCount = parseInt(counter.textContent.replace(/[^0-9]/g, '')) || 1247;
+            counter.textContent = `${currentCount + 1}+`;
+        }
+    }
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <span class="notification-message">${message}</span>
+            <button class="notification-close">&times;</button>
+        `;
+
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s ease-out;
+        `;
+
+        // Add animation keyframes if not already present
+        if (!document.querySelector('#notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+                .notification-close {
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    padding: 0;
+                    line-height: 1;
+                }
+                .notification-close:hover {
+                    opacity: 0.7;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Add close functionality
+        notification.querySelector('.notification-close').addEventListener('click', () => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        });
+
+        // Add to document
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 5000);
+    }
 });
 
 // Performance monitoring (for development)

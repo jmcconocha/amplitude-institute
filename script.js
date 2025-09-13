@@ -428,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('waitlist-signup').reset();
 
             // Show success message
-            showNotification('🎉 Successfully joined the waitlist! You\'ll receive updates about our Q1 2025 launch.', 'success');
+            showNotification('🎉 Successfully joined the waitlist! You\'ll receive updates about our Q1 2026 launch.', 'success');
 
             // Update waitlist counter (placeholder)
             updateWaitlistCounter();

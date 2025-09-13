@@ -5,6 +5,50 @@ All notable changes to The Amplitude Institute website will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-09-13
+
+### Added - Marketing Website Transformation
+
+#### 🎯 Pre-Launch Marketing Implementation
+- **Waitlist-Focused Strategy**: Complete transformation to pre-launch waitlist building for Q1 2026
+- **"Coming Soon" Components**: Replaced all placeholder content with professional "Coming Soon" sections
+- **Lead Generation System**: Comprehensive waitlist signup with form validation and user notifications
+- **Responsive Design**: Mobile-first waitlist and marketing components with modern UI
+
+#### 📋 New Marketing Components
+- **Hero Metrics Display**: Visual metrics cards showing "5 Days to Working Prototype", "75% Target Success Rate", "2-4 Weeks to Patent Filing"
+- **4-Step Process Timeline**: Apply & Match → Prepare → 5-Day Sprint → Deliver with detailed descriptions
+- **Dual Pricing Strategy**: Engineer pricing ($397) and Company pricing ($15,000) with value comparisons
+- **Success Stories Preview**: "Coming Soon - Q1 2026" section with launch messaging and target metrics
+- **Comprehensive Waitlist Form**: Name, email, user type selection, and optional innovation concept input
+- **Early Access Benefits**: 5 key benefits for waitlist members including priority booking and founding member discount
+
+#### 🎨 Enhanced User Experience
+- **Interactive Form Validation**: Real-time email validation and required field checking
+- **Loading States**: Visual feedback during form submission with button state changes
+- **Toast Notifications**: Success and error messaging system with animations
+- **Waitlist Counter**: Dynamic counter showing current waitlist numbers (starting at 1,247+)
+- **Mobile Optimization**: Responsive design for all new components across all device sizes
+
+#### Files Modified
+- **index.html**: Complete marketing content transformation based on Notion implementation guides
+- **styles.css**: Added 200+ lines of CSS for new marketing components with responsive design
+- **script.js**: Added waitlist form functionality, validation, and notification system
+
+#### Technical Implementation Details
+- **CSS Grid Layouts**: Hero metrics, process timeline, pricing grid, and preview metrics
+- **Backdrop Filters**: Modern glass-morphism effects on form components
+- **CSS Animations**: Smooth transitions, hover effects, and notification animations
+- **Form State Management**: JavaScript handling of form submission, validation, and user feedback
+- **Progressive Enhancement**: Features work with or without JavaScript enabled
+- **Performance Optimized**: Efficient CSS selectors and minimal JavaScript impact
+
+#### Content Strategy Alignment
+- **Target Audiences**: Clear messaging for both Engineers (92% have unused ideas) and Companies (traditional R&D costs $250K+)
+- **Value Propositions**: Focus on speed (5 days vs 18+ months), cost savings, and IP protection
+- **Launch Messaging**: Consistent Q1 2026 launch date throughout all components
+- **Professional Tone**: Balanced professional authority with accessible innovation messaging
+
 ## [2.1.2] - 2025-09-13
 
 ### Removed - Local Development Environment

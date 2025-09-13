@@ -1343,6 +1343,19 @@ body {
     pointer-events: none;
 }
 
+.value-props .section-header {
+    position: relative;
+    z-index: 1;
+}
+
+.value-props .section-header h2 {
+    color: #fff;
+}
+
+.value-props .section-header p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
 .value-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

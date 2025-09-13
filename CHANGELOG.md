@@ -5,13 +5,43 @@ All notable changes to The Amplitude Institute website will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2025-09-13
+
+### Removed - Local Development Environment
+
+#### 🧹 Development Environment Cleanup
+- **Local Dependencies**: Removed `node_modules/` and `package-lock.json` for clean repository
+- **Development Database**: Removed local SQLite database file (`database.sqlite`)
+- **Local Configuration**: Removed `.env` file with local environment variables
+- **Debug Files**: Cleaned up local logs, debug files, and temporary files
+- **Production Safety**: Verified production deployment on Render remains completely unaffected
+
+#### Files Removed
+- `node_modules/` - Development dependencies (can be reinstalled with `npm install`)
+- `package-lock.json` - Lock file (regenerated on `npm install`)
+- `database.sqlite` - Local development database
+- `logs/` - Local log directory
+- `.env` - Local environment configuration
+- `console-logs.json`, `network-requests.json`, `debug_admin.py` - Debug files
+
+#### Documentation Updated
+- **README.md**: Added warning about removed local environment with reinstallation instructions
+- **Development Section**: Clear guidance for developers who need local setup
+- **Production Focus**: Emphasized that production deployment on Render is unaffected
+
+#### Technical Details
+- Local cleanup has zero impact on production Render deployment
+- Production uses separate PostgreSQL database and environment variables
+- Repository is now cleaner for collaboration and deployment
+- Developers can still set up local environment by following updated README instructions
+
 ## [2.1.1] - 2025-01-13
 
 ### Fixed - Navigation Menu Consistency
 
 #### 🧭 Authentication-Aware Navigation
 - **Menu Consistency**: Fixed Research Community and Partnership pages to show proper logged-in navigation menu
-- **Profile/Admin Access**: Added Profile and Admin links to all pages for authenticated users  
+- **Profile/Admin Access**: Added Profile and Admin links to all pages for authenticated users
 - **Logout Functionality**: Added logout button to all pages when user is logged in
 - **JavaScript Integration**: Enabled authentication checking on all pages via existing `checkAuthAndUpdateUI()` function
 

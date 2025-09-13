@@ -131,9 +131,12 @@ TheAmplitudeInstitute/
 
 ## 🛠️ Development
 
-### Local Development Setup
+### ⚠️ Local Development Environment Removed
 
-1. **Install dependencies:**
+**Note**: The local development environment has been removed to avoid conflicts with the production deployment. This project is now configured for production deployment only on Render.com.
+
+**If you need local development:**
+1. **Reinstall dependencies:**
    ```bash
    npm install
    ```

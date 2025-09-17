@@ -74,7 +74,9 @@ app.use('/api/profile', authMiddleware.requireAuth, profileRoutes);
 app.post('/api/test-email', async (req, res) => {
   try {
     console.log('📧 Test email endpoint called');
-    const result = await emailService.sendTestEmail(process.env.ADMIN_EMAIL);
+    const toEmail = req.body.toEmail || process.env.ADMIN_EMAIL;
+    console.log('📧 Sending test email to:', toEmail);
+    const result = await emailService.sendTestEmail(toEmail);
 
     if (result.success) {
       console.log('✅ Test email sent successfully:', result.messageId);

@@ -11,6 +11,7 @@ const adminRoutes = require('./routes/admin');
 const profileRoutes = require('./routes/profile');
 const authMiddleware = require('./middleware/auth');
 const { initDatabase } = require('./database/adapter');
+const emailService = require('./services/email');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -68,6 +69,37 @@ app.use(cookieParser());
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/admin', authMiddleware.requireAuth, authMiddleware.requireAdmin, adminRoutes);
 app.use('/api/profile', authMiddleware.requireAuth, profileRoutes);
+
+// Test email endpoint for SendGrid verification
+app.post('/api/test-email', async (req, res) => {
+  try {
+    console.log('📧 Test email endpoint called');
+    const result = await emailService.sendTestEmail(process.env.ADMIN_EMAIL);
+
+    if (result.success) {
+      console.log('✅ Test email sent successfully:', result.messageId);
+      res.json({
+        success: true,
+        message: 'Test email sent successfully',
+        messageId: result.messageId
+      });
+    } else {
+      console.error('❌ Test email failed:', result.error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to send test email',
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('❌ Test email endpoint error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during test email',
+      error: error.message
+    });
+  }
+});
 
 // Public routes (no authentication required)
 app.get('/login', (req, res) => {

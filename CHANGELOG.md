@@ -5,6 +5,51 @@ All notable changes to The Amplitude Institute website will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2025-09-21
+
+### Added - SendGrid Integration & Dynamic Features
+
+#### 📧 Email Service Migration
+- **SendGrid Integration**: Migrated from SMTP to SendGrid for improved email delivery reliability
+- **Test Email Endpoint**: Added `/api/auth/test-email` for email service verification and testing
+- **Custom Email Support**: Enhanced test endpoint to support custom email addresses for verification
+- **Production Email Service**: Professional-grade email delivery with SendGrid's reliable infrastructure
+
+#### 🎯 Dynamic Hero Section
+- **Rotating Headlines**: Implemented dynamic hero headlines that rotate automatically for engaging messaging
+- **Performance Metrics Display**: Enhanced hero section with credible rapid development metrics
+- **Professional Messaging**: Improved headline rotation system for dynamic user engagement
+
+#### 🛠️ User Experience Improvements
+- **Text Contrast Enhancement**: Improved readability with better color contrast throughout the site
+- **Value Proposition Styling**: Added white text styling for value-props section headers on dark backgrounds
+- **Navigation Fixes**: Resolved broken navigation links on research and partnerships pages
+- **Professional Metrics**: Enhanced hero metrics section with better visual styling
+
+#### 🔧 Technical Enhancements
+- **Email Service Abstraction**: Clean separation between email service implementation and application logic
+- **API Enhancement**: Improved test endpoint with better error handling and email validation
+- **Contact Information**: Updated contact email to info@amplitudeinstitute.com across all pages
+
+### Changed - Email Configuration
+- **SMTP Replacement**: Replaced SMTP configuration with SendGrid API key configuration
+- **Environment Variables**: Updated from `SMTP_*` variables to `SENDGRID_API_KEY`
+- **Email Documentation**: Updated README with SendGrid-specific instructions and features
+
+### Fixed - UI & Navigation Issues
+- **Text Readability**: Fixed low contrast text issues throughout the application
+- **Navigation Links**: Resolved broken links affecting user navigation flow
+- **Contact Information**: Standardized contact email across all website pages
+- **Hero Section Styling**: Professional styling improvements for better visual impact
+
+### Files Modified
+- `services/email.js` - Complete migration from Nodemailer/SMTP to SendGrid
+- `routes/auth.js` - Enhanced test email endpoint with custom email support
+- `public/index.html` - Dynamic hero headlines and improved text contrast
+- `public/styles.css` - Enhanced styling for readability and professional appearance
+- `README.md` - Updated documentation to reflect SendGrid integration
+- Multiple pages - Contact email standardization and navigation fixes
+
 ## [2.2.0] - 2025-09-13
 
 ### Added - Marketing Website Transformation

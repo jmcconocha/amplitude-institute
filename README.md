@@ -115,14 +115,14 @@ TheAmplitudeInstitute/
 - **Modern UI**: Blue gradient themes with smooth animations
 - **Performance Optimized**: Nginx with gzip compression and caching
 - **Smooth Scrolling**: JavaScript-powered navigation with active link tracking
-- **Interactive Elements**: Hover effects, mobile navigation, and notification system
+- **Interactive Elements**: Hover effects, mobile navigation, notification system, and rotating hero headlines
 - **SEO Friendly**: Proper meta tags and semantic HTML structure
 
 ### Authentication Features
 - **Secure Authentication**: JWT tokens with HTTP-only cookies
 - **User Registration**: Self-service registration with admin approval
 - **Admin Panel**: Complete user management dashboard
-- **Email Notifications**: SMTP integration for registration and approval workflows
+- **Email Notifications**: SendGrid integration for registration and approval workflows
 - **Role-based Access**: Admin and user roles with different permissions
 - **Session Management**: Secure login/logout with session persistence
 - **Password Security**: Bcrypt hashing and password complexity requirements
@@ -167,7 +167,7 @@ TheAmplitudeInstitute/
 
 Required environment variables (see `.env.example`):
 - `JWT_SECRET`: Secret key for JWT token signing
-- `SMTP_*`: Email server configuration for notifications
+- `SENDGRID_API_KEY`: SendGrid API key for email notifications
 - `ADMIN_EMAIL`: Administrator email address
 - `DATABASE_PATH`: Path to SQLite database file
 
@@ -188,7 +188,7 @@ Required environment variables (see `.env.example`):
 - **Database**: SQLite (development) / PostgreSQL (production)
 - **Authentication**: JWT tokens with HTTP-only cookies
 - **Security**: Helmet.js, CORS, rate limiting, bcrypt hashing
-- **Email**: Nodemailer with SMTP support
+- **Email**: SendGrid service with API integration
 - **Validation**: Express-validator with custom rules
 
 ### Frontend Stack  
@@ -199,8 +199,8 @@ Required environment variables (see `.env.example`):
 - **Notifications**: Custom toast notification system
 
 ### Deployment Options
-- **Development**: SQLite database, local SMTP testing
-- **Production**: PostgreSQL database, cloud SMTP services
+- **Development**: SQLite database, SendGrid email service
+- **Production**: PostgreSQL database, SendGrid email service
 - **Docker**: Multi-stage builds with Nginx proxy
 - **Render**: Auto-deployment with PostgreSQL database
 
@@ -257,20 +257,17 @@ The blueprint automatically configures:
 - **Admin Login**: Use `jmcconocha@abydosone.ltd` / `TempAdmin123!`
 
 #### Step 4: Configure Email (Optional)
-Email notifications require SMTP configuration. Add these environment variables in Render:
+Email notifications use SendGrid for reliable delivery. Add this environment variable in Render:
 
 ```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
+SENDGRID_API_KEY=your-sendgrid-api-key
 ```
 
-**Email Service Options:**
-- **Gmail**: Free, use app-specific password
-- **SendGrid**: 100 emails/day free
-- **Mailgun**: 10,000 emails/month free
-- **Skip**: System works without email (no notifications)
+**Email Service Features:**
+- **SendGrid Integration**: 100 emails/day free tier
+- **Test Endpoint**: `/api/auth/test-email` for verification
+- **Reliable Delivery**: Production-grade email service
+- **Skip Option**: System works without email (no notifications)
 
 #### Render Features
 - ✅ **Free HTTPS/SSL certificate**
